@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍄 Ankit's Super Mario Career Adventure!</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P:wght@400&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background: #5C94FC;
+            overflow: hidden; /* Changed from overflow-x: hidden */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Game Header */
+        .game-header {
+            background: #000;
+            color: #fff;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 14px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Hero Section with Game Toggle */
+        .hero-section {
+            margin-top: 60px; /* Adjusted margin */
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0px #000;
+            animation: bounce 2s infinite;
+        }
+        
+        /* UPDATED: Increased font size for the intro paragraph */
+        .hero-intro {
+            font-size: 14px; 
+            margin: 20px auto; 
+            max-width: 800px;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .mode-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .mode-btn {
+            background: #FFD700;
+            color: #000;
+            border: 4px solid #FFA500;
+            padding: 15px 30px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 0px #CC8400;
+        }
+
+        .mode-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #CC8400;
+        }
+
+        .mode-btn.active {
+            background: #FF6347;
+            color: white;
+            border-color: #FF4500;
+        }
+
+        /* Game Canvas Container */
+        .game-container {
+            display: none;
+            position: relative;
+            width: 100%;
+            height: 600px; /* This will be controlled by JS now */
+            background: #5C94FC;
+            margin: 20px auto 0;
+            flex-grow: 1;
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        /* Game Canvas */
+        #gameCanvas {
+            display: block;
+            background: #5C94FC;
+            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Game Instructions */
+        .game-instructions {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            z-index: 100;
+            line-height: 1.6;
+        }
+
+        /* Info Pop-up */
+        .info-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #FFF;
+            border: 4px solid #000;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 8px 8px 0px #000;
+            z-index: 2000;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+            animation: popIn 0.3s ease;
+        }
+
+        .info-popup.show {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .info-popup h3 {
+            color: #FF6347;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .info-popup p, .info-popup li {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #FF6347;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+        /* Professional Mode */
+        .professional-mode {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .professional-mode.active {
+            display: block;
+        }
+
+        .resume-section {
+            background: white;
+            margin: 20px 0;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #FF6347;
+            padding-bottom: 10px;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .experience-item, .project-item {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 5px solid #4ECDC4;
+            border-radius: 5px;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #FF6347;
+            margin-bottom: 5px;
+        }
+
+        .position {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .achievements {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .achievements li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            font-size: 12px;
+        }
+
+        .achievements li::before {
+            content: "🌟";
+            position: absolute;
+            left: 0;
+        }
+
+        /* Completion Message */
+        .completion-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            color: #FFD700;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            z-index: 3000;
+            display: none;
+            animation: victoryFlash 2s infinite;
+        }
+
+        @keyframes victoryFlash {
+            0%, 100% { background: #000; }
+            50% { background: #2a2a2a; }
+        }
+
+        .completion-message.show {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title { font-size: 22px; }
+            .hero-intro { font-size: 12px; }
+            .mode-toggle { flex-direction: column; align-items: center; }
+            .game-container { height: 400px; }
+            .info-popup { max-width: 90%; padding: 20px; }
+            .game-instructions { font-size: 10px; padding: 10px; }
+            .score-board { font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Game Header -->
+    <div class="game-header">
+        <div class="score-board">
+            <div>ANKIT</div>
+            <div>🪙 <span id="coins">0</span></div>
+            <div>⭐ <span id="score">000000</span></div>
+            <div>🌍 1-1</div>
+            <div>⏰ <span id="time">400</span></div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <h1 class="hero-title">🎮 Ankit's Super Mario Career Quest! 🎮</h1>
+        <!-- UPDATED: Applied new class for better styling -->
+        <p class="hero-intro">
+            Experience my portfolio like never before! Play through classic Mario levels to discover my skills, 
+            projects, and achievements, or view my professional resume in traditional format.
+        </p>
+        
+        <div class="mode-toggle">
+            <button class="mode-btn active" onclick="switchMode('game')">
+                🎮 MARIO ADVENTURE
+            </button>
+            <button class="mode-btn" onclick="switchMode('professional')">
+                📄 PROFESSIONAL VIEW
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container active" id="gameContainer">
+        <div class="game-instructions">
+            <div>🎮 CONTROLS:</div>
+            <div>← → : Move Mario</div>
+            <div>SPACE : Jump</div>
+            <div>Hit ? blocks from below!</div>
+            <div>Reach the castle to win!</div>
+        </div>
+        <!-- IMPORTANT: Width and height will be set by JS for responsiveness -->
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- Professional Mode -->
+    <div class="professional-mode" id="professionalMode">
+        
+        <div class="resume-section">
+            <h2 class="section-title">👨‍💻 PROFESSIONAL SUMMARY</h2>
+            <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+                Elite Software Engineer with exceptional problem-solving prowess and cutting-edge expertise in DSA and backend development. 
+                Built production-grade applications serving 500+ users and optimized systems to handle millions of requests with exceptional performance.
+            </p>
+        </div>
+
+        <div class="resume-section">
+            <h2 class="section-title">🏢 EXPERIENCE</h2>
+            
+            <div class="experience-item">
+                <div class="company-name">🚀 Simpl - Fintech Unicorn</div>
+                <div class="position">Software Engineer Intern | May 2025 - July 2025</div>
+                <ul class="achievements">
+                    <li>Reduced backend load by optimizing Pay-in-3 transaction flow by 75%</li>
+                    <li>Built high-performance APIs serving millions of requests with low latency</li>
+                    <li>Migrated legacy merchant configuration tables across multiple services</li>
+                    <li>Extended fraud detection infrastructure with session tracking</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <div class="company-name">⚡ Fleeter - Tech Startup</div>
+                <div class="position">Software Engineer Intern | December 2024 - February 2025</div>
+                <ul class="achievements">
+                    <li>Developed dynamic product pricing module with MySQL optimization</li>
+                    <li>Resolved critical Razorpay API settlement issues</li>
+                    <li>Enhanced CI/CD pipeline with Jenkins and AWS automation</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="resume-section">
+            <h2 class="section-title">🚀 BREAKTHROUGH PROJECTS</h2>
+            
+            <div class="project-item">
+                <div class="company-name">BitWebApp-24 - Academic Management System</div>
+                <ul class="achievements">
+                    <li>Engineered web application for 500+ students with Prof. Dr. Kanungo</li>
+                    <li>Integrated 25+ features across academic, review, and alumni modules</li>
+                    <li>Achieved 30% efficiency improvement with ExcelJS integration</li>
+                </ul>
+            </div>
+
+            <div class="project-item">
+                <div class="company-name">CursorTalks - AI Voice Coding Assistant</div>
+                <ul class="achievements">
+                    <li>Created voice-powered AI assistant using GPT-4o and LangChain</li>
+                    <li>Implemented multi-step reasoning with LangGraph</li>
+                    <li>Integrated speech recognition and text-to-speech capabilities</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="resume-section">
+            <h2 class="section-title">📞 CONTACT</h2>
+            <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.8;">
+                📧 Email: ankitvsv0311@gmail.com<br>
+                📱 Phone: +91-8555806581<br>
+                💼 LinkedIn: linkedin.com/in/ankitverma2405<br>
+                👨‍💻 GitHub: github.com/Ankit8125
+            </p>
+        </div>
+    </div>
+
+    <!-- Info Popup -->
+    <div class="info-popup" id="infoPopup">
+        <button class="close-btn" onclick="closePopup()">×</button>
+        <div id="popupContent"></div>
+    </div>
+
+    <!-- Completion Message -->
+    <div class="completion-message" id="completionMessage">
+        <h2>🏆 CONGRATULATIONS! 🏆</h2>
+        <p style="margin: 20px 0; font-size: 12px; font-family: Arial, sans-serif;">
+            You've successfully explored Ankit's entire career journey!<br>
+            All skills, projects, and achievements discovered!
+        </p>
+        <p style="font-size: 10px; font-family: Arial, sans-serif;">
+            Ready to hire this Super Mario Developer?
+        </p>
+        <button onclick="closeCompletion()" style="margin-top: 20px; padding: 15px 30px; background: #4ECDC4; border: none; color: white; font-family: inherit; cursor: pointer;">
+            HIRE ANKIT!
+        </button>
+    </div>
+
+    <script>
+        // Game Variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const TILE_SIZE = 32;
+        const LEVEL_WIDTH_TILES = 150;
+        const LEVEL_WIDTH_PIXELS = LEVEL_WIDTH_TILES * TILE_SIZE;
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+
+
+        // Prevent default key behaviors to avoid page scrolling
+        window.addEventListener('keydown', function(e) {
+            if(['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+                e.preventDefault();
+            }
+        });
+
+        // Game State
+        let gameRunning = false;
+        let score = 0;
+        let coins = 0;
+        let time = 400;
+        let blocksHit = 0;
+        let gameBlocks = [];
+        let particles = [];
+        let enemies = [];
+        let currentMode = 'game';
+        // NEW: Camera object for scrolling
+        let camera = { x: 0, y: 0 };
+        let gameComplete = false;
+
+        // Player Object (Mario)
+        const mario = {
+            x: 50,
+            y: 450,
+            width: TILE_SIZE * 0.9,
+            height: TILE_SIZE * 0.9,
+            velocityX: 0,
+            velocityY: 0,
+            speed: 5,
+            jumpPower: 15,
+            onGround: false,
+            direction: 1, // 1 = right, -1 = left
+            alive: true,
+            invulnerable: false,
+            respawnTimer: 0
+        };
+
+        // Enemy class
+        class Enemy {
+            constructor(x, y, type = 'goomba') {
+                this.x = x;
+                this.y = y;
+                this.width = TILE_SIZE * 0.9;
+                this.height = TILE_SIZE * 0.9;
+                this.velocityX = -1.5;
+                this.velocityY = 0;
+                this.type = type;
+                this.alive = true;
+                this.onGround = false;
+            }
+
+            update() {
+                if (!this.alive) return;
+
+                this.velocityY += 0.8; // Gravity
+                
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+
+                this.onGround = false;
+                [...platforms, ...gameBlocks].forEach(p => {
+                    if (this.x < p.x + p.width && this.x + this.width > p.x &&
+                        this.y + this.height >= p.y && this.y + this.height <= p.y + this.velocityY + 1) {
+                        this.y = p.y - this.height;
+                        this.velocityY = 0;
+                        this.onGround = true;
+                    }
+                });
+
+                if (this.x < 0 || this.x > LEVEL_WIDTH_PIXELS) {
+                    this.velocityX = -this.velocityX;
+                }
+
+                // Mario collision
+                if (mario.alive && !mario.invulnerable &&
+                    this.x < mario.x + mario.width &&
+                    this.x + this.width > mario.x &&
+                    this.y < mario.y + mario.height &&
+                    this.y + this.height > mario.y) {
+                    
+                    if (mario.velocityY > 0 && (mario.y + mario.height) < (this.y + 20)) {
+                        this.alive = false;
+                        mario.velocityY = -8;
+                        score += 100;
+                        document.getElementById('score').textContent = score.toString().padStart(6, '0');
+                    } else {
+                        killMario();
+                    }
+                }
+            }
+            
+            // NEW: Improved Goomba drawing
+            draw() {
+                if (!this.alive) return;
+                const x = this.x;
+                const y = this.y;
+                
+                // Feet
+                ctx.fillStyle = '#222';
+                ctx.fillRect(x, y + this.height - 5, this.width / 2 - 1, 5);
+                ctx.fillRect(x + this.width / 2 + 1, y + this.height - 5, this.width / 2 - 1, 5);
+
+                // Body
+                ctx.fillStyle = '#8B4513'; // Brown
+                ctx.beginPath();
+                ctx.moveTo(x + 2, y + this.height - 4);
+                ctx.lineTo(x + this.width - 2, y + this.height - 4);
+                ctx.lineTo(x + this.width - 8, y);
+                ctx.lineTo(x + 8, y);
+                ctx.closePath();
+                ctx.fill();
+
+                // Eyes
+                ctx.fillStyle = 'white';
+                ctx.fillRect(x + 8, y + 8, 5, 8);
+                ctx.fillRect(x + this.width - 13, y + 8, 5, 8);
+                ctx.fillStyle = 'black';
+                ctx.fillRect(x + 8, y + 11, 5, 5);
+                ctx.fillRect(x + this.width - 13, y + 11, 5, 5);
+            }
+        }
+
+        // Level Data
+        const questionBlocks = [
+            { x: 300, y: 400, info: { title: '💻 Programming Skills', content: 'Master of Go, C++, Python, JavaScript & TypeScript! Built scalable applications across multiple programming paradigms with production-grade quality.' }},
+            { x: 500, y: 320, info: { title: '🌐 Full-Stack Mastery', content: 'Expert in React, Next.js, Node.js, Express.js & Ruby on Rails. Complete frontend-to-backend development capabilities!' }},
+            { x: 700, y: 400, info: { title: '🚀 Simpl Experience', content: 'Optimized Pay-in-3 transaction flow by 75%! Built high-performance APIs serving millions of requests with ultra-low latency at fintech unicorn.' }},
+            { x: 900, y: 300, info: { title: '🎓 BitWebApp Project', content: 'Academic management system serving 500+ students! Integrated 25+ features with 30% efficiency improvement using modern tech stack.' }},
+            { x: 1100, y: 400, info: { title: '🏆 Elite Achievements', content: 'JEE 98.7 percentile, 8.21 CGPA, 500+ problems solved, Winner BIT Nishan with ₹1L grant for AI startup!' }},
+            { x: 1300, y: 350, info: { title: '🤖 AI/ML Innovation', content: 'Built CursorTalks voice AI assistant using GPT-4o, LangChain & LangGraph. Speech-to-code revolutionary technology!' }},
+            { x: 1500, y: 280, info: { title: '⚡ Fleeter Experience', content: 'Dynamic pricing module with MySQL optimization. Resolved Razorpay API issues. Enhanced CI/CD with Jenkins & AWS automation.' }},
+            { x: 1700, y: 400, info: { title: '🗃️ Database Expertise', content: 'MongoDB, PostgreSQL, MySQL mastery. Optimized queries, designed schemas, handled millions of records efficiently!' }},
+            { x: 1900, y: 320, info: { title: '☁️ Cloud & DevOps', content: 'AWS, Docker, Jenkins, Git expertise. Streamlined deployment pipelines and infrastructure management!' }},
+            { x: 2100, y: 400, info: { title: '📞 Let\'s Connect!', content: '📧 ankitvsv0311@gmail.com | 📱 +91-8555806581 | 💼 LinkedIn: ankitverma2405 | 👨‍💻 GitHub: Ankit8125' }}
+        ];
+
+        const platforms = [
+            { x: 0, y: 550, width: LEVEL_WIDTH_PIXELS, height: 50, type: 'ground' },
+            { x: 400, y: 450, width: 160, height: TILE_SIZE, type: 'brick' },
+            { x: 800, y: 400, width: 80, height: TILE_SIZE, type: 'brick' },
+            { x: 1000, y: 350, width: 120, height: TILE_SIZE, type: 'brick' },
+            { x: 1400, y: 380, width: 100, height: TILE_SIZE, type: 'brick' },
+            { x: 1800, y: 420, width: 140, height: TILE_SIZE, type: 'brick' }
+        ];
+
+        const decorations = [
+            { x: 150, y: 100, type: 'cloud', size: 1 }, { x: 450, y: 80, type: 'cloud', size: 1.2 },
+            { x: 800, y: 120, type: 'cloud', size: 0.8 }, { x: 1200, y: 90, type: 'cloud', size: 1 },
+            { x: 1600, y: 110, type: 'cloud', size: 1.1 }, { x: 2000, y: 85, type: 'cloud', size: 0.9 },
+            { x: 2400, y: 115, type: 'cloud', size: 1 },
+            { x: 200, y: 470, type: 'hill', size: 1 }, { x: 600, y: 480, type: 'hill', size: 0.8 },
+            { x: 1000, y: 475, type: 'hill', size: 1.2 }, { x: 1400, y: 485, type: 'hill', size: 0.9 },
+            { x: 1800, y: 470, type: 'hill', size: 1 },
+            { x: 350, y: 470, type: 'pipe', height: 80 }, { x: 1100, y: 450, type: 'pipe', height: 100 },
+            { x: 1850, y: 460, type: 'pipe', height: 90 }, { x: 2400, y: 420, type: 'pipe', height: 130 }
+        ];
+
+        const castle = { x: LEVEL_WIDTH_PIXELS - 400, y: 250, width: 256, height: 300 };
+        const flag = { x: LEVEL_WIDTH_PIXELS - 550, y: 150, height: 400 };
+
+        // Functions
+        function initGame() {
+            gameBlocks = questionBlocks.map(block => ({
+                ...block, width: TILE_SIZE, height: TILE_SIZE, hit: false,
+                bouncing: false, bounceOffset: 0, originalY: block.y
+            }));
+            gameRunning = true;
+            resizeCanvas();
+            startTimer();
+            spawnInitialEnemies();
+        }
+
+        function spawnInitialEnemies() {
+            enemies.push(new Enemy(600, 400));
+            enemies.push(new Enemy(850, 300));
+            enemies.push(new Enemy(1200, 400));
+            enemies.push(new Enemy(1600, 300));
+            enemies.push(new Enemy(2000, 400));
+        }
+
+        function killMario() {
+            if (!mario.alive) return;
+            mario.alive = false;
+            mario.velocityY = -12;
+            mario.respawnTimer = 180;
+        }
+
+        function respawnMario() {
+            mario.x = 50;
+            mario.y = 450;
+            mario.velocityX = 0;
+            mario.velocityY = 0;
+            mario.alive = true;
+            mario.invulnerable = true;
+            mario.onGround = false;
+            setTimeout(() => { mario.invulnerable = false; }, 3000);
+        }
+
+        function startTimer() {
+            setInterval(() => {
+                if (gameRunning && time > 0) {
+                    time--;
+                    document.getElementById('time').textContent = time.toString().padStart(3, '0');
+                    if (time === 0) { gameOver(); }
+                }
+            }, 1000);
+        }
+
+        const keys = { right: false, left: false, up: false };
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = true;
+        });
+        document.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
+        });
+
+        function gameLoop() {
+            if (currentMode !== 'game') return;
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            if (!mario.alive) {
+                mario.respawnTimer--;
+                if (mario.respawnTimer <= 0) respawnMario();
+                mario.y += mario.velocityY; // Still affected by gravity on death
+                mario.velocityY += 0.8;
+                return;
+            }
+
+            if (keys.left) {
+                mario.velocityX = -mario.speed;
+                mario.direction = -1;
+            } else if (keys.right) {
+                mario.velocityX = mario.speed;
+                mario.direction = 1;
+            } else {
+                mario.velocityX *= 0.9;
+            }
+
+            if (keys.up && mario.onGround) {
+                mario.velocityY = -mario.jumpPower;
+                mario.onGround = false;
+            }
+
+            mario.velocityY += 0.8;
+            mario.x += mario.velocityX;
+            mario.y += mario.velocityY;
+
+            if (mario.x < 0) mario.x = 0;
+            if (mario.x + mario.width > LEVEL_WIDTH_PIXELS) mario.x = LEVEL_WIDTH_PIXELS - mario.width;
+            if (mario.y > canvas.height) killMario();
+
+            mario.onGround = false;
+            [...platforms, ...gameBlocks].forEach(p => {
+                // Vertical collision
+                if (mario.x < p.x + p.width && mario.x + mario.width > p.x) {
+                    if (mario.y + mario.height >= p.y && mario.y + mario.height <= p.y + mario.velocityY + 1) {
+                        mario.y = p.y - mario.height;
+                        mario.velocityY = 0;
+                        mario.onGround = true;
+                    }
+                    // Head collision
+                    if (mario.y <= p.y + p.height && mario.y >= p.y && mario.velocityY < 0) {
+                        mario.y = p.y + p.height;
+                        mario.velocityY = 0;
+                        if (p.info) hitQuestionBlock(p); // Check if it's a question block
+                    }
+                }
+            });
+
+            gameBlocks.forEach(block => {
+                if (block.bouncing) {
+                    block.y -= 2;
+                    if (block.y < block.originalY - 10) block.bouncing = false;
+                } else if (!block.bouncing && block.y < block.originalY) {
+                    block.y += 2;
+                }
+            });
+
+            enemies.forEach(enemy => enemy.update());
+            enemies = enemies.filter(enemy => enemy.y < canvas.height + 100);
+
+            if (mario.x + mario.width > castle.x) {
+                if (blocksHit >= questionBlocks.length * 0.7) {
+                    gameComplete = true;
+                    gameRunning = false;
+                    showCompletion();
+                }
+            }
+            
+            // NEW: Camera update logic
+            const targetCameraX = mario.x - canvas.width / 3;
+            camera.x += (targetCameraX - camera.x) * 0.1;
+            if (camera.x < 0) camera.x = 0;
+            if (camera.x > LEVEL_WIDTH_PIXELS - canvas.width) camera.x = LEVEL_WIDTH_PIXELS - canvas.width;
+
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => {
+                p.y += p.vy;
+                p.x += p.vx;
+                p.vy += 0.2;
+                p.life--;
+                p.alpha = p.life / 60;
+            });
+        }
+
+        function hitQuestionBlock(block) {
+            if (block.hit) return;
+            block.hit = true;
+            block.bouncing = true;
+            score += 200;
+            coins++;
+            blocksHit++;
+            document.getElementById('score').textContent = score.toString().padStart(6, '0');
+            document.getElementById('coins').textContent = coins;
+            
+            particles.push({
+                x: block.x + block.width / 2, y: block.y, vx: 0, vy: -5,
+                life: 60, alpha: 1, type: 'coin'
+            });
+
+            setTimeout(() => showPopup(block), 300);
+        }
+
+        function draw() {
+            ctx.fillStyle = '#5C94FC';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // NEW: Apply camera transform
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            drawDecorations();
+            drawPlatforms();
+            drawQuestionBlocks();
+            enemies.forEach(enemy => enemy.draw());
+            drawCastle();
+            drawFlag();
+            drawMario();
+            drawParticles();
+
+            ctx.restore();
+            drawUI();
+        }
+
+        // --- NEW & IMPROVED DRAWING FUNCTIONS ---
+
+        function drawDecorations() {
+            decorations.forEach(d => {
+                switch(d.type) {
+                    case 'cloud': drawCloud(d.x, d.y, d.size); break;
+                    case 'hill': drawHill(d.x, d.y, d.size); break;
+                    case 'pipe': drawPipe(d.x, d.y, d.height); break;
+                }
+            });
+        }
+        
+        function drawCloud(x, y, s) {
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath();
+            ctx.arc(x, y, 20*s, Math.PI * 0.5, Math.PI * 1.5);
+            ctx.arc(x + 35*s, y - 10*s, 25*s, Math.PI * 1, Math.PI * 2);
+            ctx.arc(x + 70*s, y, 20*s, Math.PI * 1.5, Math.PI * 0.5);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawHill(x, y, s) {
+            ctx.fillStyle = '#00A800';
+            ctx.beginPath();
+            ctx.arc(x + 60*s, y + 80*s, 60*s, Math.PI, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#228B22';
+            ctx.beginPath();
+            ctx.arc(x + 40*s, y + 80*s, 40*s, Math.PI, 0);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawPipe(x, y, height) {
+            ctx.fillStyle = '#00A800'; // Main pipe
+            ctx.fillRect(x, y, 80, height);
+            ctx.fillStyle = '#008000'; // Shadow
+            ctx.fillRect(x + 65, y, 15, height);
+            ctx.fillStyle = '#98FB98'; // Highlight
+            ctx.fillRect(x, y, 15, height);
+
+            ctx.fillStyle = '#00A800'; // Top part
+            ctx.fillRect(x - 10, y - 30, 100, 30);
+            ctx.fillStyle = '#008000'; // Top shadow
+            ctx.fillRect(x + 75, y - 30, 15, 30);
+            ctx.fillStyle = '#98FB98'; // Top highlight
+            ctx.fillRect(x-10, y - 30, 15, 30);
+        }
+
+        function drawPlatforms() {
+            platforms.forEach(p => {
+                 if (p.type === 'ground') {
+                    for(let i = 0; i < p.width; i += TILE_SIZE) {
+                        drawBrick(i, p.y, '#D2691E');
+                        drawBrick(i, p.y + TILE_SIZE, '#D2691E');
+                    }
+                } else if (p.type === 'brick') {
+                    for(let i = 0; i < p.width; i += TILE_SIZE) {
+                        drawBrick(p.x + i, p.y, '#D2691E');
+                    }
+                }
+            });
+        }
+        
+        function drawBrick(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = 'black';
+            ctx.fillRect(x, y + TILE_SIZE/2, TILE_SIZE, 2);
+            ctx.fillRect(x + TILE_SIZE/2, y, 2, TILE_SIZE/2);
+        }
+        
+        function drawQuestionBlocks() {
+            gameBlocks.forEach(block => {
+                const y = block.y;
+                if (block.hit) {
+                    ctx.fillStyle = '#A0522D';
+                    ctx.fillRect(block.x, y, block.width, block.height);
+                    ctx.strokeStyle = '#000';
+                    ctx.strokeRect(block.x, y, block.width, block.height);
+                } else {
+                    ctx.fillStyle = '#FFD700';
+                    ctx.fillRect(block.x, y, block.width, block.height);
+                    ctx.fillStyle = '#000';
+                    ctx.font = 'bold 24px "Press Start 2P"';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('?', block.x + block.width/2, y + block.height - 5);
+                }
+            });
+        }
+        
+        function drawCastle() {
+            for(let row = 0; row < 9; row++) {
+                for(let col = 0; col < 8; col++) {
+                    if ((col === 0 && row > 4) || (col === 7 && row > 4) || (col > 0 && col < 7 && row === 5) || (col > 2 && col < 5 && row > 5)) {
+                        // skip
+                    } else if (col > 2 && col < 5 && row === 8) {
+                        ctx.fillStyle = 'black';
+                        ctx.fillRect(castle.x + col * TILE_SIZE, castle.y + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    }
+                    else {
+                        drawBrick(castle.x + col * TILE_SIZE, castle.y + row * TILE_SIZE, '#D2691E');
+                    }
+                }
+            }
+        }
+        
+        function drawFlag() {
+            ctx.fillStyle = '#696969';
+            ctx.fillRect(flag.x, flag.y, 10, flag.height);
+            ctx.beginPath();
+            ctx.arc(flag.x + 5, flag.y, 15, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function drawMario() {
+            if (!mario.alive) {
+                 // Draw a simple falling shape for dead Mario
+                ctx.fillStyle = '#FF0000';
+                ctx.fillRect(mario.x, mario.y, mario.width, mario.height);
+                return;
+            }
+
+            if (mario.invulnerable && Math.floor(Date.now() / 100) % 2) {
+                ctx.globalAlpha = 0.5;
+            }
+            
+            const x = mario.x; const y = mario.y; const w = mario.width; const h = mario.height;
+            // Overalls
+            ctx.fillStyle = '#0000FF'; // Blue
+            ctx.fillRect(x, y + h * 0.55, w, h * 0.45);
+            // Shirt
+            ctx.fillStyle = '#FF0000'; // Red
+            ctx.fillRect(x, y + h * 0.3, w, h * 0.3);
+            // Face
+            ctx.fillStyle = '#FFDAB9'; // Peach
+            ctx.fillRect(x + w * 0.2, y + h * 0.1, w * 0.6, h * 0.3);
+            // Hat
+            ctx.fillStyle = '#FF0000';
+            ctx.fillRect(x + w * 0.1, y, w * 0.8, h * 0.2);
+            
+            ctx.globalAlpha = 1.0;
+        }
+
+        function drawParticles() {
+            particles.forEach(p => {
+                ctx.fillStyle = `rgba(255, 215, 0, ${p.alpha})`;
+                ctx.globalAlpha = p.alpha;
+                ctx.font = '20px "Press Start 2P"';
+                ctx.fillText('🪙', p.x, p.y);
+                ctx.globalAlpha = 1;
+            });
+        }
+        
+        function drawUI() {
+             if (blocksHit > 0) {
+                const barWidth = 200;
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(20, 20, barWidth + 4, 34);
+                
+                ctx.fillStyle = '#FF6347';
+                ctx.fillRect(22, 22, barWidth, 30);
+                
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(22, 22, (barWidth * blocksHit / questionBlocks.length), 30);
+                
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = '10px "Press Start 2P"';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Discovered: ${Math.round(blocksHit / questionBlocks.length * 100)}%`, 22 + barWidth/2, 42);
+                ctx.textAlign = 'start';
+            }
+        }
+
+        // --- Event and Mode Switching Functions ---
+        
+        function showPopup(block) {
+            const popup = document.getElementById('infoPopup');
+            const content = document.getElementById('popupContent');
+            content.innerHTML = `<h3>${block.info.title}</h3><p>${block.info.content}</p>`;
+            popup.classList.add('show');
+        }
+
+        function showCompletion() {
+            document.getElementById('completionMessage').classList.add('show');
+        }
+
+        function closePopup() {
+            document.getElementById('infoPopup').classList.remove('show');
+        }
+
+        function closeCompletion() {
+            document.getElementById('completionMessage').classList.remove('show');
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            // No alert to prevent blocking
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.mode-btn[onclick="switchMode('${mode}')"]`).classList.add('active');
+            
+            if (mode === 'game') {
+                document.getElementById('gameContainer').classList.add('active');
+                document.getElementById('professionalMode').classList.remove('active');
+                gameRunning = true;
+                gameLoop(); // Restart loop if it was stopped
+            } else {
+                document.getElementById('gameContainer').classList.remove('active');
+                document.getElementById('professionalMode').classList.add('active');
+                gameRunning = false;
+            }
+        }
+        
+        // Initialize and start game
+        window.onload = () => {
+            initGame();
+            gameLoop();
+        };
+
+        // Close popup when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'infoPopup') {
+                closePopup();
+            }
+        });
+    </script>
+</body>
+</html>
