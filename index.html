@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍄 Ankit's Super Mario Career Adventure!</title>
+    <title>🍄 Ankit's Portoflio!</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P:wght@400&display=swap');
@@ -255,6 +255,16 @@
             font-size: 12px;
         }
 
+        /* Centered, gamified hint inside popup */
+        .popup-hint {
+            margin-top: 12px;
+            text-align: center;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 11px;
+            color: #222;
+            letter-spacing: 0.5px;
+        }
+
         /* Professional Mode - UPDATED for scrolling */
         .professional-mode {
             display: none;
@@ -384,6 +394,23 @@
             .score-board { font-size: 9px; }
             .touch-btn { width: 56px; height: 56px; font-size: 16px; }
         }
+
+        /* Gate tooltip styling */
+        .gate-tooltip {
+            position: absolute;
+            z-index: 120;
+            background: rgba(0,0,0,0.85);
+            color: #FFD700;
+            padding: 10px 12px;
+            border: 2px solid #000;
+            border-radius: 8px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -429,6 +456,8 @@
             <div>Reach the castle to win!</div>
         </div>
         <canvas id="gameCanvas"></canvas>
+    <!-- Gate tooltip (shown when blocks are incomplete) -->
+    <div id="gateTooltip" class="gate-tooltip" style="display:none;">Discover all blocks to enter the castle!</div>
         <!-- Touch controls overlay (shown on small screens) -->
         <div class="touch-controls" id="touchControls" aria-hidden="true">
             <div class="cluster" style="justify-content:flex-start;">
@@ -447,7 +476,7 @@
         <div class="resume-section">
             <h2 class="section-title">👨‍💻 PROFESSIONAL SUMMARY</h2>
             <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
-                Elite Software Engineer with exceptional problem-solving prowess and cutting-edge expertise in DSA and backend development. 
+                Aspiring Software Engineer with exceptional problem-solving prowess and cutting-edge expertise in DSA and backend development. 
                 Built production-grade applications serving 500+ users and optimized systems to handle millions of requests with exceptional performance.
             </p>
         </div>
@@ -456,56 +485,71 @@
             <h2 class="section-title">🏢 EXPERIENCE</h2>
             
             <div class="experience-item">
-                <div class="company-name">🚀 Simpl - Fintech Unicorn</div>
-                <div class="position">Software Engineer Intern | May 2025 - July 2025</div>
+                <div class="company-name">🚀 Simpl - Fintech Startup</div>
+                <div class="position">Software Engineer Intern | May 2025 - Jul 2025 · Bengaluru (On-site)</div>
                 <ul class="achievements">
-                    <li>Reduced backend load by optimizing Pay-in-3 transaction flow by 75%</li>
-                    <li>Built high-performance APIs serving millions of requests with low latency</li>
-                    <li>Migrated legacy merchant configuration tables across multiple services</li>
-                    <li>Extended fraud detection infrastructure with session tracking</li>
+                    <li>Reduced backend load by optimizing external calls in the Pay-in-3 transaction flow, cutting redundant requests by 75% without affecting functionality.</li>
+                    <li>Built and deployed high-performance backend APIs for updating user credit configurations, serving millions of requests across core transaction services with low latency.</li>
+                    <li>Migrated backend data usage from legacy merchant configuration tables to new product configuration tables across multiple services, improving code maintainability and deployment flexibility.</li>
+                    <li>Created internal documentation for APIs and system behaviors to ease onboarding and support better team collaboration across backend services.</li>
+                    <li>Extended fraud detection infrastructure by implementing session identifier extraction from HTTP cookies.</li>
+                    <li>Enhanced API reliability by correcting HTTP response codes to follow REST standards, leading to cleaner error handling.</li>
                 </ul>
             </div>
 
             <div class="experience-item">
                 <div class="company-name">⚡ Fleeter - Tech Startup</div>
-                <div class="position">Software Engineer Intern | December 2024 - February 2025</div>
+                <div class="position">Software Engineer Intern | Dec 2024 - Feb 2025</div>
                 <ul class="achievements">
-                    <li>Developed dynamic product pricing module with MySQL optimization</li>
-                    <li>Resolved critical Razorpay API settlement issues</li>
-                    <li>Enhanced CI/CD pipeline with Jenkins and AWS automation</li>
+                    <li>Designed and implemented a location-based pricing module for the cart page by creating MySQL tables and views.</li>
+                    <li>Diagnosed and resolved issues related to Razorpay API and GPS form integration bugs.</li>
+                    <li>Integrated Jenkins for automated CI/CD pipelines, improving deployment efficiency.</li>
                 </ul>
             </div>
         </div>
 
         <div class="resume-section">
-            <h2 class="section-title">🚀 BREAKTHROUGH PROJECTS</h2>
+            <h2 class="section-title">🚀 PROJECTS</h2>
             
             <div class="project-item">
-                <div class="company-name">BitWebApp-24 - Academic Management System</div>
+                <div class="company-name">BitWebApp-24 — Academic Management System &nbsp;|&nbsp; <a href="https://github.com/Ankit8125/BitWebApp-24" target="_blank" rel="noopener">Project Link</a></div>
+                <p style="margin:8px 0 10px 0; font-size:12px; color:#555;">Tech stack: MongoDB, Express.js, React, Node.js, Multer, Cloudinary, Tailwind CSS</p>
                 <ul class="achievements">
-                    <li>Engineered web application for 500+ students with Prof. Dr. Kanungo</li>
-                    <li>Integrated 25+ features across academic, review, and alumni modules</li>
-                    <li>Achieved 30% efficiency improvement with ExcelJS integration</li>
+                    <li>Engineered a web application with a 7‑member team under Prof. Dr. Kanungo, streamlining data management for 500+ students.</li>
+                    <li>Integrated 25+ features into academic, review, booking and alumni modules for student and admin interfaces.</li>
+                    <li>Improved data management efficiency by 30% through dynamic reporting.</li>
                 </ul>
             </div>
 
             <div class="project-item">
-                <div class="company-name">CursorTalks - AI Voice Coding Assistant</div>
+                <div class="company-name">CursorTalks — AI Voice Coding Assistant &nbsp;|&nbsp; <a href="https://github.com/Ankit8125/cursorTalks" target="_blank" rel="noopener">Project Link</a></div>
+                <p style="margin:8px 0 10px 0; font-size:12px; color:#555;">Tech stack: LangChain, LangGraph, OpenAI GPT-4o, MongoDB</p>
                 <ul class="achievements">
-                    <li>Created voice-powered AI assistant using GPT-4o and LangChain</li>
-                    <li>Implemented multi-step reasoning with LangGraph</li>
-                    <li>Integrated speech recognition and text-to-speech capabilities</li>
+                    <li>Created a voice-based AI coding assistant using GPT-4o for natural language code generation and execution.</li>
+                    <li>Implemented LangGraph with LangChain to enable multi-step reasoning and context using MongoDB.</li>
+                    <li>Integrated SpeechRecognition and TTS for complete voice-driven interaction, including task output via speech.</li>
                 </ul>
             </div>
+        </div>
+
+        <div class="resume-section">
+            <h2 class="section-title">🏆 ACHIEVEMENTS</h2>
+            <ul class="achievements">
+                <li>Winner, BIT NISHAN 2024 – Secured ₹1,00,000 grant for JurixAI, selected among the top 50 teams.</li>
+                <li>Published 10+ YouTube videos on college and anime topics, totalling 40,000+ views across 2 channels.</li>
+                <li>Developed a MOOC solutions portal using Streamlit, helping 3,000+ students in my college with coursework.</li>
+                <li>Exams: JEE Mains 98.7 percentile, COMEDK 97.9 percentile, BITSAT 236/390.</li>
+                <li>Solved 1000+ coding problems across platforms such as LeetCode, GFG, CodeChef, Codeforces.</li>
+            </ul>
         </div>
 
         <div class="resume-section">
             <h2 class="section-title">📞 CONTACT</h2>
             <p style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.8;">
-                📧 Email: ankitvsv0311@gmail.com<br>
-                📱 Phone: +91-8555806581<br>
-                💼 LinkedIn: linkedin.com/in/ankitverma2405<br>
-                👨‍💻 GitHub: github.com/Ankit8125
+                📧 Email: <a href="mailto:ankitvsv0311@gmail.com">ankitvsv0311@gmail.com</a><br>
+                💼 LinkedIn: <a href="https://www.linkedin.com/in/ankitverma2405/" target="_blank" rel="noopener">ankitverma2405</a><br>
+                👨‍💻 GitHub: <a href="https://github.com/Ankit8125" target="_blank" rel="noopener">Ankit8125</a><br>
+                𝕏 Twitter: <a href="https://x.com/Ankit_2_4_1_9" target="_blank" rel="noopener">Ankit_2_4_1_9</a>
             </p>
         </div>
     </div>
@@ -525,9 +569,9 @@
             All skills, projects, and achievements discovered!
         </p>
         <p style="font-size: 10px; font-family: Arial, sans-serif;">
-            Ready to hire this Super Mario Developer?
+            Ready to hire this (not just a) Developer?
         </p>
-        <button onclick="closeCompletion()" style="margin-top: 20px; padding: 15px 30px; background: #4ECDC4; border: none; color: white; font-family: inherit; cursor: pointer;">
+    <button onclick="openLinkedIn()" style="margin-top: 20px; padding: 15px 30px; background: #4ECDC4; border: none; color: white; font-family: inherit; cursor: pointer;">
             HIRE ANKIT!
         </button>
     </div>
@@ -736,16 +780,48 @@
         ];
 
         const originalQuestionBlocksInfo = [
-            { title: '💻 Tech Stack Mastery', content: 'Golang, Ruby, PostgreSQL, React, Node.js, Express, JavaScript, Python, C++. Full-stack development with modern frameworks and databases!' },
-            { title: '🚀 Simpl Internship', content: 'SWE Intern (May 2025): Reduced backend load by 75% in Pay-in-3 flow. Built high-performance APIs serving millions of requests with low latency!' },
-            { title: '⚡ Fleeter Experience', content: 'SWE Intern (Dec 2024 - Feb 2025): Location-based pricing module, Razorpay API fixes, Jenkins CI/CD automation. Full-stack problem solving!' },
-            { title: '🎓 Academic Excellence', content: 'BIT Mesra CSE student with 8.21 CGPA. Strong foundation in DSA, OOPS, DBMS, OS. Consistent high performance!' },
-            { title: '🏆 Major Achievements', content: 'BIT NISHAN 2024 Winner - ₹1,00,000 grant for JurixAI! JEE Mains 98.7 percentile. Top 50 startup teams nationwide!' },
-            { title: '🛠️ BitWebApp-24 Project', content: 'Web app for 500+ students with Prof. Dr. Kanungo. 25+ features, 30% efficiency improvement using ExcelJS integration!' },
-            { title: '🤖 CursorTalks AI Assistant', content: 'Voice-based AI coding assistant using GPT-4o, LangChain, LangGraph. Complete voice-driven code generation and execution!' },
-            { title: '📊 Problem Solving Pro', content: '500+ coding problems solved across LeetCode, GFG, CodeChef, Codeforces. Strong algorithmic thinking and optimization skills!' },
-            { title: '📹 Content Creator', content: 'Published 10+ YouTube videos with 40,000+ views. MOOC solutions portal helping 3000+ college students with coursework!' },
-            { title: '📞 Let\'s Connect!', content: '📧 ankitvsv0311@gmail.com | 📱 +91-8555806581 | 💼 LinkedIn: ankitverma2405 | 👨‍💻 GitHub: Ankit8125' }
+            { title: '🧰 Tech Stack', content: 'C++, Node.js, Express, React, Next.js, MongoDB, MySQL, Tailwind, Cloudinary, Multer, LangChain/LangGraph, OpenAI GPT-4o.' },
+            { title: '🚀 Simpl Internship', content: [
+                'Cut redundant external calls in Pay‑in‑3 by 75% without loss of functionality.',
+                'Built and deployed low‑latency credit‑config APIs used in core transactions.',
+                'Migrated services from legacy merchant configs to product config tables.',
+                'Authored internal API/system docs to speed onboarding and collaboration.',
+                'Implemented session‑ID extraction from cookies for fraud detection.',
+                'Corrected REST response codes for clearer, reliable error handling.'
+            ] },
+            { title: '⚡ Fleeter Internship', content: [
+                'Designed and built location‑based pricing (MySQL tables + views).',
+                'Diagnosed and fixed Razorpay API and GPS form integration issues.',
+                'Set up Jenkins CI/CD to automate builds and deployments.'
+            ] },
+            { title: '🛠️ BitWebApp‑24', content: [
+                'Co‑built with a 7‑member team under Prof. Dr. Kanungo; streamlined data for 500+ students.',
+                'Integrated 25+ features across academic, review, booking, and alumni modules.',
+                'Used by BIT Mesra, Ranchi for student/admin workflows.'
+            ] },
+            { title: '🤖 CursorTalks', content: [
+                'Built a voice‑based AI coding assistant using GPT‑4o.',
+                'Used LangGraph + LangChain with MongoDB for multi‑step reasoning.',
+                'Added SpeechRecognition + TTS for end‑to‑end voice interaction.'
+            ] },
+            { title: '🏆 Achievements', content: [
+                'Winner, BIT NISHAN 2024 – ₹1,00,000 grant for JurixAI (Top 50).',
+                'Published 10+ YouTube videos; 40,000+ views across 2 channels.',
+                'MOOC solutions portal helping 3,000+ students.'
+            ] },
+            { title: '📊 Problem Solving', content: 'Solved 1000+ coding problems across LeetCode, GFG, CodeChef, and Codeforces.' },
+            { title: '📚 Exams', content: 'JEE Mains 98.7 percentile · COMEDK 97.9 percentile · BITSAT 236/390.' },
+            { title: '💡 What I Do', content: [
+                'Turn ideas into projects that people actually use (BitWebApp-24, CursorTalks).',
+                'Tinker with AI + web to explore new possibilities in human-computer interaction.',
+                'Thrive in fast-paced startup-like environments where shipping > talking.'
+            ]},
+            { title: '📞 Let\'s Connect', content: [
+                'Email: ankitvsv0311@gmail.com',
+                'LinkedIn: /in/ankitverma2405',
+                'GitHub: /Ankit8125',
+                'X: @Ankit_2_4_1_9' 
+            ]}
         ];
 
         // SIMPLIFIED: Question blocks with minimal complexity
@@ -862,6 +938,13 @@
         document.addEventListener('keydown', (e) => {
             // Allow key state updates even when paused so keys don't get stuck
             if (gameOverState) return; // lock controls after game over
+            // If popup is open, allow Space to close it and stop further handling
+            const popupEl = document.getElementById('infoPopup');
+            if (popupEl && popupEl.classList.contains('show') && e.code === 'Space') {
+                e.preventDefault();
+                closePopup();
+                return;
+            }
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
             if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = true;
@@ -881,7 +964,7 @@
             requestAnimationFrame(gameLoop);
         }
 
-        function update() {
+    function update() {
             if (!gameRunning || gamePaused || gameOverState) return; // UPDATED: Check for pause + game over
 
             if (!mario.alive) {
@@ -956,11 +1039,37 @@
             enemies.forEach(enemy => enemy.update());
             enemies = enemies.filter(enemy => (enemy.y - camera.y) < canvas.clientHeight + 100 && enemy.alive);
 
-            if (mario.x + mario.width > castle.x) {
-                if (blocksHit >= questionBlocks.length * 0.7) {
-                    gameComplete = true;
-                    gameRunning = false;
-                    showCompletion();
+            // Gate: cannot pass the flag until ALL yellow blocks are hit
+            const allHit = blocksHit >= questionBlocks.length;
+            if (!allHit) {
+                const gateX = flag.x - 2; // small margin before the pole
+                if (mario.x + mario.width > gateX) {
+                    mario.x = gateX - mario.width;
+                    if (mario.velocityX > 0) mario.velocityX = 0;
+                    // Subtle bounce and tooltip when blocked
+                    const now = Date.now();
+                    if (now - lastGateBounceTime > 600) {
+                        mario.velocityX = -2;
+                        if (mario.onGround) mario.velocityY = -3;
+                        lastGateBounceTime = now;
+                        showGateTooltip();
+                    }
+                }
+            }
+
+            // Completion: only when reaching castle AND all blocks discovered
+            if (mario.x + mario.width > castle.x && allHit) {
+                gameComplete = true;
+                gameRunning = false;
+                showCompletion();
+            }
+
+            // Hard stop: never allow moving beyond the right side of the castle
+            {
+                const castleRightCap = castle.x + castle.width - 2; // slight buffer inside
+                if (mario.x + mario.width > castleRightCap) {
+                    mario.x = castleRightCap - mario.width;
+                    if (mario.velocityX > 0) mario.velocityX = 0;
                 }
             }
             
@@ -1307,13 +1416,38 @@
                 ctx.textAlign = 'start';
             }
         }
+
+        // --- Gate Tooltip helpers ---
+        let gateTipTimeout = null;
+        let lastGateBounceTime = 0;
+        function showGateTooltip() {
+            const el = document.getElementById('gateTooltip');
+            const gc = document.getElementById('gameContainer');
+            if (!el || !gc) return;
+            // Position near the flag, slightly above ground, clamped to container
+            const left = Math.max(8, Math.min(gc.clientWidth - 220, Math.floor(flag.x - camera.x - 60)));
+            const top = Math.max(8, Math.min(gc.clientHeight - 50, Math.floor(platforms[0].y - camera.y - 80)));
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
+            el.style.display = 'block';
+            el.style.opacity = '1';
+            if (gateTipTimeout) clearTimeout(gateTipTimeout);
+            gateTipTimeout = setTimeout(() => {
+                el.style.opacity = '0';
+                // Hide after fade
+                setTimeout(() => { el.style.display = 'none'; }, 200);
+            }, 1500);
+        }
         
         // UPDATED: Auto-close popup after 4 seconds with visible countdown and pause game
         function showPopup(block) {
             const popup = document.getElementById('infoPopup');
             const content = document.getElementById('popupContent');
             const timerEl = document.getElementById('popupTimer');
-            content.innerHTML = `<h3>${block.info.title}</h3><p>${block.info.content}</p>`;
+            const body = Array.isArray(block.info.content)
+                ? `<ul style="padding-left:18px; margin:8px 0;">${block.info.content.map(p => `<li style='margin:6px 0; font-family: Arial, sans-serif; font-size: 14px;'>${p}</li>`).join('')}</ul>`
+                : `<p>${block.info.content}</p>`;
+            content.innerHTML = `<h3>${block.info.title}</h3>${body}<div class="popup-hint">Click space to close</div>`;
             popup.classList.add('show');
             
             // Pause the game while reading
@@ -1372,6 +1506,12 @@
 
         function closeCompletion() {
             document.getElementById('completionMessage').classList.remove('show');
+        }
+
+        function openLinkedIn() {
+            const url = 'https://www.linkedin.com/in/ankitverma2405/';
+            const win = window.open(url, '_blank', 'noopener');
+            if (win) { win.opener = null; }
         }
 
         async function downloadResume() {
