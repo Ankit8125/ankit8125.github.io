@@ -14,10 +14,14 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: 'Press Start 2P', cursive;
             background: #5C94FC;
-            overflow: hidden; /* Changed from overflow-x: hidden */
+            /* REMOVED: overflow: hidden - now allows scrolling */
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -47,11 +51,12 @@
 
         /* Hero Section with Game Toggle */
         .hero-section {
-            margin-top: 60px; /* Adjusted margin */
+            margin-top: 60px;
             text-align: center;
             padding: 40px 20px;
             background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
             color: white;
+            flex-shrink: 0;
         }
 
         .hero-title {
@@ -61,7 +66,6 @@
             animation: bounce 2s infinite;
         }
         
-        /* UPDATED: Increased font size for the intro paragraph */
         .hero-intro {
             font-size: 14px; 
             margin: 20px auto; 
@@ -106,15 +110,15 @@
             border-color: #FF4500;
         }
 
-        /* Game Canvas Container */
+        /* Game Canvas Container - UPDATED */
         .game-container {
             display: none;
             position: relative;
             width: 100%;
-            height: 600px; /* This will be controlled by JS now */
             background: #5C94FC;
-            margin: 20px auto 0;
-            flex-grow: 1;
+            margin: 0 auto;
+            height: 600px; /* Fixed height instead of flex-grow */
+            min-height: 600px;
         }
 
         .game-container.active {
@@ -130,6 +134,45 @@
             height: 100%;
         }
 
+        /* Touch Controls for mobile/tablet */
+        .touch-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: none;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 12px;
+            z-index: 110;
+            pointer-events: none; /* container ignores events; buttons accept */
+        }
+        .touch-controls .cluster {
+            display: flex;
+            gap: 12px;
+            pointer-events: auto;
+        }
+        .touch-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 3px solid rgba(0,0,0,0.5);
+            background: rgba(255,255,255,0.25);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            color: #000;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        .touch-btn:active { transform: scale(0.96); }
+
         /* Game Instructions */
         .game-instructions {
             position: absolute;
@@ -144,7 +187,7 @@
             line-height: 1.6;
         }
 
-        /* Info Pop-up */
+        /* Info Pop-up - UPDATED with auto-close */
         .info-popup {
             position: fixed;
             top: 50%;
@@ -165,6 +208,19 @@
 
         .info-popup.show {
             display: block;
+        }
+
+        /* ADDED: Countdown timer styling */
+        .popup-timer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #FF6347;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 10px;
+            font-weight: bold;
         }
 
         @keyframes popIn {
@@ -199,12 +255,13 @@
             font-size: 12px;
         }
 
-        /* Professional Mode */
+        /* Professional Mode - UPDATED for scrolling */
         .professional-mode {
             display: none;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            /* REMOVED: flex-grow: 1 and overflow-y: auto */
         }
 
         .professional-mode.active {
@@ -298,10 +355,17 @@
             .hero-title { font-size: 22px; }
             .hero-intro { font-size: 12px; }
             .mode-toggle { flex-direction: column; align-items: center; }
-            .game-container { height: 400px; }
+            .game-container { height: 400px; min-height: 400px; }
             .info-popup { max-width: 90%; padding: 20px; }
             .game-instructions { font-size: 10px; padding: 10px; }
             .score-board { font-size: 10px; }
+            .touch-controls { display: flex; }
+        }
+
+        @media (max-width: 480px) {
+            .game-container { height: 360px; min-height: 360px; }
+            .score-board { font-size: 9px; }
+            .touch-btn { width: 56px; height: 56px; font-size: 16px; }
         }
     </style>
 </head>
@@ -313,14 +377,13 @@
             <div>🪙 <span id="coins">0</span></div>
             <div>⭐ <span id="score">000000</span></div>
             <div>🌍 1-1</div>
-            <div>⏰ <span id="time">400</span></div>
+            <div>⏰ <span id="time">200</span></div>
         </div>
     </div>
 
     <!-- Hero Section -->
     <div class="hero-section">
         <h1 class="hero-title">🎮 Ankit's Super Mario Career Quest! 🎮</h1>
-        <!-- UPDATED: Applied new class for better styling -->
         <p class="hero-intro">
             Experience my portfolio like never before! Play through classic Mario levels to discover my skills, 
             projects, and achievements, or view my professional resume in traditional format.
@@ -332,6 +395,9 @@
             </button>
             <button class="mode-btn" onclick="switchMode('professional')">
                 📄 PROFESSIONAL VIEW
+            </button>
+            <button class="mode-btn" onclick="downloadResume()" style="background: #4ECDC4; border-color: #3A9B9B;">
+                📥 DOWNLOAD RESUME
             </button>
         </div>
     </div>
@@ -345,8 +411,17 @@
             <div>Hit ? blocks from below!</div>
             <div>Reach the castle to win!</div>
         </div>
-        <!-- IMPORTANT: Width and height will be set by JS for responsiveness -->
         <canvas id="gameCanvas"></canvas>
+        <!-- Touch controls overlay (shown on small screens) -->
+        <div class="touch-controls" id="touchControls" aria-hidden="true">
+            <div class="cluster" style="justify-content:flex-start;">
+                <button class="touch-btn" id="btnLeft" aria-label="Move Left">◀</button>
+                <button class="touch-btn" id="btnRight" aria-label="Move Right">▶</button>
+            </div>
+            <div class="cluster" style="justify-content:flex-end;">
+                <button class="touch-btn" id="btnJump" aria-label="Jump">⤴</button>
+            </div>
+        </div>
     </div>
 
     <!-- Professional Mode -->
@@ -420,6 +495,7 @@
 
     <!-- Info Popup -->
     <div class="info-popup" id="infoPopup">
+    <div class="popup-timer" id="popupTimer">7</div>
         <button class="close-btn" onclick="closePopup()">×</button>
         <div id="popupContent"></div>
     </div>
@@ -445,15 +521,20 @@
         const ctx = canvas.getContext('2d');
         
         const TILE_SIZE = 32;
-        const LEVEL_WIDTH_TILES = 150;
+        const LEVEL_WIDTH_TILES = 120; // REDUCED from 150 to bring castle closer
         const LEVEL_WIDTH_PIXELS = LEVEL_WIDTH_TILES * TILE_SIZE;
 
         function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            const dpr = Math.max(1, window.devicePixelRatio || 1);
+            const cssW = canvas.parentElement.clientWidth;
+            const cssH = canvas.parentElement.clientHeight;
+            canvas.width = Math.max(1, Math.floor(cssW * dpr));
+            canvas.height = Math.max(1, Math.floor(cssH * dpr));
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr); // draw in CSS pixel space
         }
+        window.addEventListener('orientationchange', resizeCanvas);
         window.addEventListener('resize', resizeCanvas);
-
 
         // Prevent default key behaviors to avoid page scrolling
         window.addEventListener('keydown', function(e) {
@@ -464,17 +545,22 @@
 
         // Game State
         let gameRunning = false;
+        let gamePaused = false; // ADDED: Game pause state
         let score = 0;
         let coins = 0;
-        let time = 400;
+        let time = 200;
         let blocksHit = 0;
         let gameBlocks = [];
         let particles = [];
         let enemies = [];
         let currentMode = 'game';
-        // NEW: Camera object for scrolling
         let camera = { x: 0, y: 0 };
         let gameComplete = false;
+        let popupTimer = null;
+        let popupCountdown = 0; // ADDED: Countdown display
+        let countdownInterval = null; // ADDED: Store countdown interval
+        let currentPipeIndex = 0; // ADDED: Track which pipe to spawn from next
+        let lastEnemySpawn = 0; // ADDED: Track last enemy spawn time
 
         // Player Object (Mario)
         const mario = {
@@ -508,7 +594,7 @@
             }
 
             update() {
-                if (!this.alive) return;
+                if (!this.alive || gamePaused) return; // ADDED: Don't update when game is paused
 
                 this.velocityY += 0.8; // Gravity
                 
@@ -516,6 +602,7 @@
                 this.y += this.velocityY;
 
                 this.onGround = false;
+                // Collision with platforms, blocks, and pipes
                 [...platforms, ...gameBlocks].forEach(p => {
                     if (this.x < p.x + p.width && this.x + this.width > p.x &&
                         this.y + this.height >= p.y && this.y + this.height <= p.y + this.velocityY + 1) {
@@ -525,7 +612,18 @@
                     }
                 });
 
-                if (this.x < 0 || this.x > LEVEL_WIDTH_PIXELS) {
+                // ADDED: Enemy collision with pipe tops  
+                pipes.forEach(pipe => {
+                    const pipeTopY = pipe.y - 30;
+                    if (this.x < pipe.x + 80 && this.x + this.width > pipe.x - 10 &&
+                        this.y + this.height >= pipeTopY && this.y + this.height <= pipeTopY + 30) {
+                        this.y = pipeTopY - this.height;
+                        this.velocityY = 0;
+                        this.onGround = true;
+                    }
+                });
+
+                if (this.x < camera.x - 100 || this.x > LEVEL_WIDTH_PIXELS) {
                     this.velocityX = -this.velocityX;
                 }
 
@@ -547,74 +645,120 @@
                 }
             }
             
-            // NEW: Improved Goomba drawing
             draw() {
                 if (!this.alive) return;
                 const x = this.x;
                 const y = this.y;
-                
-                // Feet
-                ctx.fillStyle = '#222';
-                ctx.fillRect(x, y + this.height - 5, this.width / 2 - 1, 5);
-                ctx.fillRect(x + this.width / 2 + 1, y + this.height - 5, this.width / 2 - 1, 5);
+                const w = this.width;
+                const h = this.height;
 
-                // Body
-                ctx.fillStyle = '#8B4513'; // Brown
+                // Feet
+                ctx.fillStyle = '#5A2D0C';
+                ctx.fillRect(x + w * 0.05, y + h * 0.85, w * 0.35, h * 0.15);
+                ctx.fillRect(x + w * 0.60, y + h * 0.85, w * 0.35, h * 0.15);
+
+                // Body (Goomba-like rounded body)
+                ctx.fillStyle = '#9C5A2C';
                 ctx.beginPath();
-                ctx.moveTo(x + 2, y + this.height - 4);
-                ctx.lineTo(x + this.width - 2, y + this.height - 4);
-                ctx.lineTo(x + this.width - 8, y);
-                ctx.lineTo(x + 8, y);
-                ctx.closePath();
+                ctx.ellipse(x + w * 0.5, y + h * 0.48, w * 0.52, h * 0.50, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Belly lighter
+                ctx.fillStyle = '#C98E5B';
+                ctx.beginPath();
+                ctx.ellipse(x + w * 0.5, y + h * 0.62, w * 0.35, h * 0.28, 0, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Eyes
-                ctx.fillStyle = 'white';
-                ctx.fillRect(x + 8, y + 8, 5, 8);
-                ctx.fillRect(x + this.width - 13, y + 8, 5, 8);
-                ctx.fillStyle = 'black';
-                ctx.fillRect(x + 8, y + 11, 5, 5);
-                ctx.fillRect(x + this.width - 13, y + 11, 5, 5);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.ellipse(x + w * 0.38, y + h * 0.42, w * 0.12, h * 0.13, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + w * 0.62, y + h * 0.42, w * 0.12, h * 0.13, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Pupils
+                ctx.fillStyle = '#000000';
+                ctx.beginPath();
+                ctx.ellipse(x + w * 0.42, y + h * 0.44, w * 0.05, h * 0.06, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(x + w * 0.58, y + h * 0.44, w * 0.05, h * 0.06, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Brows (angry)
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(x + w * 0.28, y + h * 0.33, w * 0.20, h * 0.03);
+                ctx.fillRect(x + w * 0.52, y + h * 0.33, w * 0.20, h * 0.03);
             }
         }
 
-        // Level Data
-        const questionBlocks = [
-            { x: 300, y: 400, info: { title: '💻 Programming Skills', content: 'Master of Go, C++, Python, JavaScript & TypeScript! Built scalable applications across multiple programming paradigms with production-grade quality.' }},
-            { x: 500, y: 320, info: { title: '🌐 Full-Stack Mastery', content: 'Expert in React, Next.js, Node.js, Express.js & Ruby on Rails. Complete frontend-to-backend development capabilities!' }},
-            { x: 700, y: 400, info: { title: '🚀 Simpl Experience', content: 'Optimized Pay-in-3 transaction flow by 75%! Built high-performance APIs serving millions of requests with ultra-low latency at fintech unicorn.' }},
-            { x: 900, y: 300, info: { title: '🎓 BitWebApp Project', content: 'Academic management system serving 500+ students! Integrated 25+ features with 30% efficiency improvement using modern tech stack.' }},
-            { x: 1100, y: 400, info: { title: '🏆 Elite Achievements', content: 'JEE 98.7 percentile, 8.21 CGPA, 500+ problems solved, Winner BIT Nishan with ₹1L grant for AI startup!' }},
-            { x: 1300, y: 350, info: { title: '🤖 AI/ML Innovation', content: 'Built CursorTalks voice AI assistant using GPT-4o, LangChain & LangGraph. Speech-to-code revolutionary technology!' }},
-            { x: 1500, y: 280, info: { title: '⚡ Fleeter Experience', content: 'Dynamic pricing module with MySQL optimization. Resolved Razorpay API issues. Enhanced CI/CD with Jenkins & AWS automation.' }},
-            { x: 1700, y: 400, info: { title: '🗃️ Database Expertise', content: 'MongoDB, PostgreSQL, MySQL mastery. Optimized queries, designed schemas, handled millions of records efficiently!' }},
-            { x: 1900, y: 320, info: { title: '☁️ Cloud & DevOps', content: 'AWS, Docker, Jenkins, Git expertise. Streamlined deployment pipelines and infrastructure management!' }},
-            { x: 2100, y: 400, info: { title: '📞 Let\'s Connect!', content: '📧 ankitvsv0311@gmail.com | 📱 +91-8555806581 | 💼 LinkedIn: ankitverma2405 | 👨‍💻 GitHub: Ankit8125' }}
-        ];
-
+        // --- SIMPLIFIED LEVEL DATA - Easy and Clean ---
         const platforms = [
             { x: 0, y: 550, width: LEVEL_WIDTH_PIXELS, height: 50, type: 'ground' },
-            { x: 400, y: 450, width: 160, height: TILE_SIZE, type: 'brick' },
-            { x: 800, y: 400, width: 80, height: TILE_SIZE, type: 'brick' },
-            { x: 1000, y: 350, width: 120, height: TILE_SIZE, type: 'brick' },
-            { x: 1400, y: 380, width: 100, height: TILE_SIZE, type: 'brick' },
-            { x: 1800, y: 420, width: 140, height: TILE_SIZE, type: 'brick' }
+            
+            // SIMPLIFIED: Only essential brown brick platforms
+            // Platform for reaching 2nd question block
+            { x: 520, y: 450, width: TILE_SIZE * 2, height: TILE_SIZE, type: 'brick' },
+            
+            // Platform for reaching 5th question block  
+            { x: 820, y: 430, width: TILE_SIZE * 2, height: TILE_SIZE, type: 'brick' },
+            
+            // Platform for reaching 8th question block
+            { x: 1120, y: 460, width: TILE_SIZE * 2, height: TILE_SIZE, type: 'brick' },
         ];
+
+        const originalQuestionBlocksInfo = [
+            { title: '💻 Tech Stack Mastery', content: 'Golang, Ruby, PostgreSQL, React, Node.js, Express, JavaScript, Python, C++. Full-stack development with modern frameworks and databases!' },
+            { title: '🚀 Simpl Internship', content: 'SWE Intern (May 2025): Reduced backend load by 75% in Pay-in-3 flow. Built high-performance APIs serving millions of requests with low latency!' },
+            { title: '⚡ Fleeter Experience', content: 'SWE Intern (Dec 2024 - Feb 2025): Location-based pricing module, Razorpay API fixes, Jenkins CI/CD automation. Full-stack problem solving!' },
+            { title: '🎓 Academic Excellence', content: 'BIT Mesra CSE student with 8.21 CGPA. Strong foundation in DSA, OOPS, DBMS, OS. Consistent high performance!' },
+            { title: '🏆 Major Achievements', content: 'BIT NISHAN 2024 Winner - ₹1,00,000 grant for JurixAI! JEE Mains 98.7 percentile. Top 50 startup teams nationwide!' },
+            { title: '🛠️ BitWebApp-24 Project', content: 'Web app for 500+ students with Prof. Dr. Kanungo. 25+ features, 30% efficiency improvement using ExcelJS integration!' },
+            { title: '🤖 CursorTalks AI Assistant', content: 'Voice-based AI coding assistant using GPT-4o, LangChain, LangGraph. Complete voice-driven code generation and execution!' },
+            { title: '📊 Problem Solving Pro', content: '500+ coding problems solved across LeetCode, GFG, CodeChef, Codeforces. Strong algorithmic thinking and optimization skills!' },
+            { title: '📹 Content Creator', content: 'Published 10+ YouTube videos with 40,000+ views. MOOC solutions portal helping 3000+ college students with coursework!' },
+            { title: '📞 Let\'s Connect!', content: '📧 ankitvsv0311@gmail.com | 📱 +91-8555806581 | 💼 LinkedIn: ankitverma2405 | 👨‍💻 GitHub: Ankit8125' }
+        ];
+
+        // SIMPLIFIED: Question blocks with minimal complexity
+        questionBlocks = [];
+        
+        // Simple horizontal layout with only 2 blocks above brown platforms
+        const questionBlockPositions = [
+            { x: 300, y: 450, info: originalQuestionBlocksInfo[0] }, // Ground level
+            { x: 540, y: 380, info: originalQuestionBlocksInfo[1] }, // Above brown platform
+            { x: 650, y: 450, info: originalQuestionBlocksInfo[2] }, // Ground level
+            { x: 750, y: 450, info: originalQuestionBlocksInfo[3] }, // Ground level  
+            { x: 840, y: 360, info: originalQuestionBlocksInfo[4] }, // Above brown platform
+            { x: 950, y: 450, info: originalQuestionBlocksInfo[5] }, // Ground level
+            { x: 1050, y: 450, info: originalQuestionBlocksInfo[6] }, // Ground level
+            { x: 1200, y: 450, info: originalQuestionBlocksInfo[7] }, // Ground level
+            { x: 1300, y: 450, info: originalQuestionBlocksInfo[8] }, // Ground level
+            { x: 1400, y: 450, info: originalQuestionBlocksInfo[9] }, // Ground level (final)
+        ];
+        
+        questionBlocks = questionBlockPositions;
 
         const decorations = [
             { x: 150, y: 100, type: 'cloud', size: 1 }, { x: 450, y: 80, type: 'cloud', size: 1.2 },
             { x: 800, y: 120, type: 'cloud', size: 0.8 }, { x: 1200, y: 90, type: 'cloud', size: 1 },
-            { x: 1600, y: 110, type: 'cloud', size: 1.1 }, { x: 2000, y: 85, type: 'cloud', size: 0.9 },
-            { x: 2400, y: 115, type: 'cloud', size: 1 },
+            { x: 1600, y: 110, type: 'cloud', size: 1.1 },
             { x: 200, y: 470, type: 'hill', size: 1 }, { x: 600, y: 480, type: 'hill', size: 0.8 },
             { x: 1000, y: 475, type: 'hill', size: 1.2 }, { x: 1400, y: 485, type: 'hill', size: 0.9 },
-            { x: 1800, y: 470, type: 'hill', size: 1 },
-            { x: 350, y: 470, type: 'pipe', height: 80 }, { x: 1100, y: 450, type: 'pipe', height: 100 },
-            { x: 1850, y: 460, type: 'pipe', height: 90 }, { x: 2400, y: 420, type: 'pipe', height: 130 }
         ];
 
-        const castle = { x: LEVEL_WIDTH_PIXELS - 400, y: 250, width: 256, height: 300 };
-        const flag = { x: LEVEL_WIDTH_PIXELS - 550, y: 150, height: 400 };
+        // UPDATED: Pipes that spawn enemies and serve as platforms
+        const pipes = [
+            { x: 400, y: 470, height: 80, lastSpawn: 0 },
+            { x: 700, y: 450, height: 100, lastSpawn: 0 },
+            { x: 1000, y: 460, height: 90, lastSpawn: 0 },
+            // MOVED last pipe closer to the last yellow box (no new pipe added)
+            { x: 1470, y: 420, height: 130, lastSpawn: 0 }
+        ];
+
+        const castle = { x: LEVEL_WIDTH_PIXELS - 1200, y: 200, width: 320, height: 350 }; // MOVED CLOSER
+        const flag = { x: LEVEL_WIDTH_PIXELS - 1400, y: 150, height: 400 }; // MOVED CLOSER
 
         // Functions
         function initGame() {
@@ -625,26 +769,50 @@
             gameRunning = true;
             resizeCanvas();
             startTimer();
-            spawnInitialEnemies();
+            setInterval(spawnEnemy, 4000);
+            // Make canvas focusable and focus it for keyboard controls
+            if (!canvas.hasAttribute('tabindex')) canvas.setAttribute('tabindex', '0');
+            canvas.focus();
         }
 
-        function spawnInitialEnemies() {
-            enemies.push(new Enemy(600, 400));
-            enemies.push(new Enemy(850, 300));
-            enemies.push(new Enemy(1200, 400));
-            enemies.push(new Enemy(1600, 300));
-            enemies.push(new Enemy(2000, 400));
+        function spawnEnemy() {
+            if (!gameRunning || gamePaused || enemies.length > 3) return;
+            
+            // FIXED: Sequential enemy spawning from pipes every 2 seconds
+            const currentTime = Date.now();
+            if (currentTime - lastEnemySpawn < 2000) return; // Wait 2 seconds between spawns
+            
+            // Find the next pipe in sequence that's in view
+            let attempts = 0;
+            while (attempts < pipes.length) {
+                const pipe = pipes[currentPipeIndex];
+                
+                // Check if pipe is in view (visible on screen)
+                if (pipe.x > camera.x - 100 && pipe.x < camera.x + canvas.clientWidth + 100) {
+                    // Spawn enemy from this pipe
+                    enemies.push(new Enemy(pipe.x + 40, pipe.y - TILE_SIZE));
+                    lastEnemySpawn = currentTime;
+                    break;
+                }
+                
+                // Move to next pipe in sequence
+                currentPipeIndex = (currentPipeIndex + 1) % pipes.length;
+                attempts++;
+            }
+            
+            // Always move to next pipe for the next spawn
+            currentPipeIndex = (currentPipeIndex + 1) % pipes.length;
         }
 
         function killMario() {
             if (!mario.alive) return;
             mario.alive = false;
             mario.velocityY = -12;
-            mario.respawnTimer = 180;
+            mario.respawnTimer = 60;
         }
 
         function respawnMario() {
-            mario.x = 50;
+            mario.x = camera.x + 50;
             mario.y = 450;
             mario.velocityX = 0;
             mario.velocityY = 0;
@@ -656,7 +824,7 @@
 
         function startTimer() {
             setInterval(() => {
-                if (gameRunning && time > 0) {
+                if (gameRunning && !gamePaused && time > 0) { // UPDATED: Also check for pause state
                     time--;
                     document.getElementById('time').textContent = time.toString().padStart(3, '0');
                     if (time === 0) { gameOver(); }
@@ -666,11 +834,13 @@
 
         const keys = { right: false, left: false, up: false };
         document.addEventListener('keydown', (e) => {
+            // Allow key state updates even when paused so keys don't get stuck
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
             if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = true;
         });
         document.addEventListener('keyup', (e) => {
+            // Always process keyup so releasing during popup clears movement
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
             if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
@@ -684,12 +854,12 @@
         }
 
         function update() {
-            if (!gameRunning) return;
+            if (!gameRunning || gamePaused) return; // UPDATED: Check for pause state
 
             if (!mario.alive) {
                 mario.respawnTimer--;
                 if (mario.respawnTimer <= 0) respawnMario();
-                mario.y += mario.velocityY; // Still affected by gravity on death
+                mario.y += mario.velocityY;
                 mario.velocityY += 0.8;
                 return;
             }
@@ -713,24 +883,35 @@
             mario.x += mario.velocityX;
             mario.y += mario.velocityY;
 
-            if (mario.x < 0) mario.x = 0;
+            if (mario.x < camera.x) mario.x = camera.x;
             if (mario.x + mario.width > LEVEL_WIDTH_PIXELS) mario.x = LEVEL_WIDTH_PIXELS - mario.width;
-            if (mario.y > canvas.height) killMario();
+            if (mario.y > platforms[0].y + 300) killMario();
 
             mario.onGround = false;
+            // Collision with platforms, blocks, and pipe tops
             [...platforms, ...gameBlocks].forEach(p => {
-                // Vertical collision
                 if (mario.x < p.x + p.width && mario.x + mario.width > p.x) {
-                    if (mario.y + mario.height >= p.y && mario.y + mario.height <= p.y + mario.velocityY + 1) {
+                    if (mario.velocityY >= 0 && mario.y + mario.height >= p.y && mario.y + mario.height <= p.y + TILE_SIZE) {
                         mario.y = p.y - mario.height;
                         mario.velocityY = 0;
                         mario.onGround = true;
                     }
-                    // Head collision
-                    if (mario.y <= p.y + p.height && mario.y >= p.y && mario.velocityY < 0) {
+                    if (mario.velocityY < 0 && mario.y <= p.y + p.height && mario.y >= p.y) {
                         mario.y = p.y + p.height;
                         mario.velocityY = 0;
-                        if (p.info) hitQuestionBlock(p); // Check if it's a question block
+                        if (p.info) hitQuestionBlock(p);
+                    }
+                }
+            });
+
+            // ADDED: Collision with pipe tops
+            pipes.forEach(pipe => {
+                const pipeTopY = pipe.y - 30; // Top of pipe cap
+                if (mario.x < pipe.x + 80 && mario.x + mario.width > pipe.x - 10) {
+                    if (mario.velocityY >= 0 && mario.y + mario.height >= pipeTopY && mario.y + mario.height <= pipeTopY + 30) {
+                        mario.y = pipeTopY - mario.height;
+                        mario.velocityY = 0;
+                        mario.onGround = true;
                     }
                 }
             });
@@ -745,7 +926,7 @@
             });
 
             enemies.forEach(enemy => enemy.update());
-            enemies = enemies.filter(enemy => enemy.y < canvas.height + 100);
+            enemies = enemies.filter(enemy => (enemy.y - camera.y) < canvas.clientHeight + 100 && enemy.alive);
 
             if (mario.x + mario.width > castle.x) {
                 if (blocksHit >= questionBlocks.length * 0.7) {
@@ -755,11 +936,21 @@
                 }
             }
             
-            // NEW: Camera update logic
-            const targetCameraX = mario.x - canvas.width / 3;
+            const targetCameraX = mario.x - canvas.clientWidth / 3;
             camera.x += (targetCameraX - camera.x) * 0.1;
             if (camera.x < 0) camera.x = 0;
-            if (camera.x > LEVEL_WIDTH_PIXELS - canvas.width) camera.x = LEVEL_WIDTH_PIXELS - canvas.width;
+            // Prevent revealing too much to the right of the castle
+            {
+                const revealLimitX = castle.x + castle.width + 20 - canvas.clientWidth; // small buffer after castle
+                const levelMax = LEVEL_WIDTH_PIXELS - canvas.clientWidth;
+                const maxCamX = Math.max(0, Math.min(levelMax, revealLimitX));
+                if (camera.x > maxCamX) camera.x = maxCamX;
+            }
+
+            // Vertical camera: keep ground in view for short screens
+            const groundBottom = platforms[0].y + platforms[0].height;
+            const desiredY = Math.max(0, groundBottom - canvas.clientHeight + 20); // small top margin
+            camera.y += (desiredY - camera.y) * 0.15;
 
             particles = particles.filter(p => p.life > 0);
             particles.forEach(p => {
@@ -790,13 +981,15 @@
         }
 
         function draw() {
+            const viewW = canvas.parentElement.clientWidth;
+            const viewH = canvas.parentElement.clientHeight;
             ctx.fillStyle = '#5C94FC';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // NEW: Apply camera transform
+            ctx.fillRect(0, 0, viewW, viewH);
             ctx.save();
             ctx.translate(-camera.x, -camera.y);
 
             drawDecorations();
+            drawPipes(); // ADDED: Draw pipes separately
             drawPlatforms();
             drawQuestionBlocks();
             enemies.forEach(enemy => enemy.draw());
@@ -809,7 +1002,11 @@
             drawUI();
         }
 
-        // --- NEW & IMPROVED DRAWING FUNCTIONS ---
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                drawPipe(pipe.x, pipe.y, pipe.height);
+            });
+        }
 
         function drawDecorations() {
             decorations.forEach(d => {
@@ -845,19 +1042,12 @@
         }
 
         function drawPipe(x, y, height) {
-            ctx.fillStyle = '#00A800'; // Main pipe
-            ctx.fillRect(x, y, 80, height);
-            ctx.fillStyle = '#008000'; // Shadow
-            ctx.fillRect(x + 65, y, 15, height);
-            ctx.fillStyle = '#98FB98'; // Highlight
-            ctx.fillRect(x, y, 15, height);
-
-            ctx.fillStyle = '#00A800'; // Top part
-            ctx.fillRect(x - 10, y - 30, 100, 30);
-            ctx.fillStyle = '#008000'; // Top shadow
-            ctx.fillRect(x + 75, y - 30, 15, 30);
-            ctx.fillStyle = '#98FB98'; // Top highlight
-            ctx.fillRect(x-10, y - 30, 15, 30);
+            ctx.fillStyle = '#00A800'; ctx.fillRect(x, y, 80, height);
+            ctx.fillStyle = '#008000'; ctx.fillRect(x + 65, y, 15, height);
+            ctx.fillStyle = '#98FB98'; ctx.fillRect(x, y, 15, height);
+            ctx.fillStyle = '#00A800'; ctx.fillRect(x - 10, y - 30, 100, 30);
+            ctx.fillStyle = '#008000'; ctx.fillRect(x + 75, y - 30, 15, 30);
+            ctx.fillStyle = '#98FB98'; ctx.fillRect(x-10, y - 30, 15, 30);
         }
 
         function drawPlatforms() {
@@ -868,8 +1058,9 @@
                         drawBrick(i, p.y + TILE_SIZE, '#D2691E');
                     }
                 } else if (p.type === 'brick') {
+                    // UPDATED: Draw brown brick platforms
                     for(let i = 0; i < p.width; i += TILE_SIZE) {
-                        drawBrick(p.x + i, p.y, '#D2691E');
+                        drawBrick(p.x + i, p.y, '#8B4513'); // Brown color for navigation platforms
                     }
                 }
             });
@@ -882,8 +1073,8 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
             ctx.fillStyle = 'black';
-            ctx.fillRect(x, y + TILE_SIZE/2, TILE_SIZE, 2);
-            ctx.fillRect(x + TILE_SIZE/2, y, 2, TILE_SIZE/2);
+            ctx.fillRect(x, y + TILE_SIZE/2 -1, TILE_SIZE, 2);
+            ctx.fillRect(x + TILE_SIZE/2 -1, y, 2, TILE_SIZE/2);
         }
         
         function drawQuestionBlocks() {
@@ -905,20 +1096,65 @@
             });
         }
         
+        // UPDATED: Traditional Mario castle design matching the reference image
         function drawCastle() {
-            for(let row = 0; row < 9; row++) {
-                for(let col = 0; col < 8; col++) {
-                    if ((col === 0 && row > 4) || (col === 7 && row > 4) || (col > 0 && col < 7 && row === 5) || (col > 2 && col < 5 && row > 5)) {
-                        // skip
-                    } else if (col > 2 && col < 5 && row === 8) {
-                        ctx.fillStyle = 'black';
-                        ctx.fillRect(castle.x + col * TILE_SIZE, castle.y + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                    }
-                    else {
-                        drawBrick(castle.x + col * TILE_SIZE, castle.y + row * TILE_SIZE, '#D2691E');
-                    }
+            const x = castle.x;
+            const y = castle.y;
+            
+            // Main castle base (wider)
+            for(let row = 0; row < 8; row++) {
+                for(let col = 0; col < 10; col++) {
+                    drawBrick(x + col * TILE_SIZE, y + 120 + row * TILE_SIZE, '#A0522D');
                 }
             }
+            
+            // Left tower
+            for(let row = 0; row < 12; row++) {
+                for(let col = 0; col < 3; col++) {
+                    drawBrick(x + col * TILE_SIZE, y + row * TILE_SIZE, '#A0522D');
+                }
+            }
+            
+            // Right tower  
+            for(let row = 0; row < 12; row++) {
+                for(let col = 7; col < 10; col++) {
+                    drawBrick(x + col * TILE_SIZE, y + row * TILE_SIZE, '#A0522D');
+                }
+            }
+            
+            // Center tower (taller)
+            for(let row = 0; row < 14; row++) {
+                for(let col = 3.5; col < 6.5; col++) {
+                    drawBrick(x + col * TILE_SIZE, y + row * TILE_SIZE, '#A0522D');
+                }
+            }
+            
+            // Castle battlements (crenellations)
+            // Left tower battlements
+            drawBrick(x, y - TILE_SIZE, '#A0522D');
+            drawBrick(x + TILE_SIZE * 2, y - TILE_SIZE, '#A0522D');
+            
+            // Center tower battlements  
+            drawBrick(x + TILE_SIZE * 3.5, y - TILE_SIZE * 2, '#A0522D');
+            drawBrick(x + TILE_SIZE * 5.5, y - TILE_SIZE * 2, '#A0522D');
+            
+            // Right tower battlements
+            drawBrick(x + TILE_SIZE * 7, y - TILE_SIZE, '#A0522D');
+            drawBrick(x + TILE_SIZE * 9, y - TILE_SIZE, '#A0522D');
+            
+            // Main entrance (dark opening)
+            for(let row = 5; row < 8; row++) {
+                for(let col = 4; col < 6; col++) {
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(x + col * TILE_SIZE, y + 120 + row * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
+            }
+            
+            // Castle flag on center tower
+            ctx.fillStyle = '#FF0000';
+            ctx.fillRect(x + TILE_SIZE * 4.7, y - TILE_SIZE * 3, TILE_SIZE * 0.6, TILE_SIZE * 0.8);
+            ctx.fillStyle = '#000';
+            ctx.fillRect(x + TILE_SIZE * 4.6, y - TILE_SIZE * 3.5, 3, TILE_SIZE * 2);
         }
         
         function drawFlag() {
@@ -931,30 +1167,86 @@
 
         function drawMario() {
             if (!mario.alive) {
-                 // Draw a simple falling shape for dead Mario
                 ctx.fillStyle = '#FF0000';
                 ctx.fillRect(mario.x, mario.y, mario.width, mario.height);
                 return;
             }
 
-            if (mario.invulnerable && Math.floor(Date.now() / 100) % 2) {
-                ctx.globalAlpha = 0.5;
-            }
-            
-            const x = mario.x; const y = mario.y; const w = mario.width; const h = mario.height;
-            // Overalls
-            ctx.fillStyle = '#0000FF'; // Blue
-            ctx.fillRect(x, y + h * 0.55, w, h * 0.45);
-            // Shirt
-            ctx.fillStyle = '#FF0000'; // Red
-            ctx.fillRect(x, y + h * 0.3, w, h * 0.3);
-            // Face
-            ctx.fillStyle = '#FFDAB9'; // Peach
-            ctx.fillRect(x + w * 0.2, y + h * 0.1, w * 0.6, h * 0.3);
+            const flicker = mario.invulnerable && Math.floor(Date.now() / 100) % 2;
+            if (flicker) ctx.globalAlpha = 0.5;
+
+            // Position and mirroring (draw around sprite center)
+            ctx.save();
+            let w = mario.width, h = mario.height;
+            ctx.translate(mario.x + w / 2, 0);
+            ctx.scale(mario.direction, 1);
+            // After transform, draw with local x anchored so that -w/2 is the left edge
+            let x = -w / 2, y = mario.y;
+
+            // Shoes
+            ctx.fillStyle = '#6B3E13';
+            ctx.fillRect(x + w * 0.05, y + h * 0.90, w * 0.4, h * 0.10);
+            ctx.fillRect(x + w * 0.55, y + h * 0.90, w * 0.4, h * 0.10);
+
+            // Overalls bottom
+            ctx.fillStyle = '#1557FF';
+            ctx.fillRect(x + w * 0.10, y + h * 0.55, w * 0.80, h * 0.35);
+
+            // Shirt sleeves
+            ctx.fillStyle = '#E11D22';
+            ctx.fillRect(x + w * 0.00, y + h * 0.40, w * 0.25, h * 0.18);
+            ctx.fillRect(x + w * 0.75, y + h * 0.40, w * 0.25, h * 0.18);
+
+            // Gloves
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(x + w * 0.00, y + h * 0.54, w * 0.18, h * 0.12);
+            ctx.fillRect(x + w * 0.82, y + h * 0.54, w * 0.18, h * 0.12);
+
+            // Torso (shirt)
+            ctx.fillStyle = '#E11D22';
+            ctx.fillRect(x + w * 0.20, y + h * 0.35, w * 0.60, h * 0.25);
+
+            // Overalls bib and straps
+            ctx.fillStyle = '#1557FF';
+            ctx.fillRect(x + w * 0.30, y + h * 0.40, w * 0.40, h * 0.25); // bib
+            ctx.fillRect(x + w * 0.30, y + h * 0.35, w * 0.08, h * 0.20); // left strap
+            ctx.fillRect(x + w * 0.62, y + h * 0.35, w * 0.08, h * 0.20); // right strap
+            // Buttons
+            ctx.fillStyle = '#FFD34D';
+            ctx.beginPath(); ctx.arc(x + w * 0.34, y + h * 0.50, w * 0.03, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x + w * 0.66, y + h * 0.50, w * 0.03, 0, Math.PI * 2); ctx.fill();
+
+            // Head/Face
+            ctx.fillStyle = '#F4C7A1';
+            ctx.fillRect(x + w * 0.28, y + h * 0.12, w * 0.44, h * 0.26);
+
             // Hat
-            ctx.fillStyle = '#FF0000';
-            ctx.fillRect(x + w * 0.1, y, w * 0.8, h * 0.2);
-            
+            ctx.fillStyle = '#E11D22';
+            ctx.fillRect(x + w * 0.20, y + h * 0.02, w * 0.60, h * 0.12);
+            // Hat brim
+            ctx.fillRect(x + w * 0.15, y + h * 0.12, w * 0.70, h * 0.06);
+            // M emblem
+            ctx.fillStyle = '#FFFFFF';
+            ctx.beginPath(); ctx.arc(x + w * 0.50, y + h * 0.08, w * 0.07, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#E11D22';
+            ctx.font = `${Math.max(8, Math.floor(w * 0.18))}px 'Press Start 2P'`;
+            ctx.textAlign = 'center';
+            ctx.fillText('M', x + w * 0.50, y + h * 0.11);
+
+            // Eyes
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(x + w * 0.38, y + h * 0.18, w * 0.09, h * 0.10);
+            ctx.fillRect(x + w * 0.53, y + h * 0.18, w * 0.09, h * 0.10);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(x + w * 0.42, y + h * 0.20, w * 0.04, h * 0.07);
+            ctx.fillRect(x + w * 0.54, y + h * 0.20, w * 0.04, h * 0.07);
+
+            // Mustache
+            ctx.fillStyle = '#3B2A1A';
+            ctx.fillRect(x + w * 0.36, y + h * 0.27, w * 0.28, h * 0.05);
+
+            // Restore transform and alpha
+            ctx.restore();
             ctx.globalAlpha = 1.0;
         }
 
@@ -987,14 +1279,36 @@
                 ctx.textAlign = 'start';
             }
         }
-
-        // --- Event and Mode Switching Functions ---
         
+        // UPDATED: Auto-close popup after 4 seconds with visible countdown and pause game
         function showPopup(block) {
             const popup = document.getElementById('infoPopup');
             const content = document.getElementById('popupContent');
+            const timerEl = document.getElementById('popupTimer');
             content.innerHTML = `<h3>${block.info.title}</h3><p>${block.info.content}</p>`;
             popup.classList.add('show');
+            
+            // Pause the game while reading
+            gamePaused = true;
+            
+            // Clear any existing timer
+            if (popupTimer) {
+                clearTimeout(popupTimer);
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // Start visible countdown from 7 to 0, then close
+            popupCountdown = 7;
+            timerEl.textContent = String(popupCountdown);
+            countdownInterval = setInterval(() => {
+                popupCountdown -= 1;
+                timerEl.textContent = String(Math.max(0, popupCountdown));
+                if (popupCountdown <= 0) {
+                    closePopup();
+                }
+            }, 1000);
         }
 
         function showCompletion() {
@@ -1003,15 +1317,52 @@
 
         function closePopup() {
             document.getElementById('infoPopup').classList.remove('show');
+            // Clear the timer when manually closing
+            if (popupTimer) {
+                clearTimeout(popupTimer);
+                popupTimer = null;
+            }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            // Reset the small timer display for next time
+            const timerEl = document.getElementById('popupTimer');
+            if (timerEl) timerEl.textContent = '7';
+            
+            // Resume the game
+            gamePaused = false;
+
+            // Clear any stuck key states and stop horizontal drift
+            keys.right = false;
+            keys.left = false;
+            keys.up = false;
+            mario.velocityX = 0;
+
+            // Return focus to canvas so arrows work immediately
+            if (!canvas.hasAttribute('tabindex')) canvas.setAttribute('tabindex', '0');
+            canvas.focus();
         }
 
         function closeCompletion() {
             document.getElementById('completionMessage').classList.remove('show');
         }
 
+        function downloadResume() {
+            // Create a link to download the resume
+            const link = document.createElement('a');
+            link.href = 'resume/ankitResume.pdf'; // Path relative to index.html
+            link.download = 'Ankit_Verma_Resume.pdf';
+            link.target = '_blank';
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function gameOver() {
             gameRunning = false;
-            // No alert to prevent blocking
         }
 
         function switchMode(mode) {
@@ -1023,7 +1374,7 @@
                 document.getElementById('gameContainer').classList.add('active');
                 document.getElementById('professionalMode').classList.remove('active');
                 gameRunning = true;
-                gameLoop(); // Restart loop if it was stopped
+                gameLoop();
             } else {
                 document.getElementById('gameContainer').classList.remove('active');
                 document.getElementById('professionalMode').classList.add('active');
@@ -1031,13 +1382,33 @@
             }
         }
         
-        // Initialize and start game
         window.onload = () => {
             initGame();
             gameLoop();
+            // Touch controls
+            const left = document.getElementById('btnLeft');
+            const right = document.getElementById('btnRight');
+            const jump = document.getElementById('btnJump');
+            const set = (k, v) => { keys[k] = v; };
+            const press = (el, downFn, upFn) => {
+                if (!el) return;
+                const onDown = (e) => { e.preventDefault(); downFn(); };
+                const onUp = (e) => { e.preventDefault(); upFn(); };
+                el.addEventListener('touchstart', onDown, { passive: false });
+                el.addEventListener('touchend', onUp, { passive: false });
+                el.addEventListener('touchcancel', onUp, { passive: false });
+                el.addEventListener('mousedown', onDown);
+                el.addEventListener('mouseup', onUp);
+                el.addEventListener('mouseleave', onUp);
+            };
+            press(left, () => set('left', true), () => set('left', false));
+            press(right, () => set('right', true), () => set('right', false));
+            press(jump, () => set('up', true), () => set('up', false));
+            // Prevent touch scrolling inside game container
+            const gc = document.getElementById('gameContainer');
+            gc.addEventListener('touchmove', (e) => { e.preventDefault(); }, { passive: false });
         };
 
-        // Close popup when clicking outside
         document.addEventListener('click', (e) => {
             if (e.target.id === 'infoPopup') {
                 closePopup();
