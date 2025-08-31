@@ -770,9 +770,8 @@
             resizeCanvas();
             startTimer();
             setInterval(spawnEnemy, 4000);
-            // Make canvas focusable and focus it for keyboard controls
+            // Make canvas focusable (do not focus to avoid auto-scroll on load)
             if (!canvas.hasAttribute('tabindex')) canvas.setAttribute('tabindex', '0');
-            canvas.focus();
         }
 
         function spawnEnemy() {
@@ -1338,10 +1337,8 @@
             keys.left = false;
             keys.up = false;
             mario.velocityX = 0;
-
-            // Return focus to canvas so arrows work immediately
+            // Avoid focusing canvas here to prevent accidental page scroll
             if (!canvas.hasAttribute('tabindex')) canvas.setAttribute('tabindex', '0');
-            canvas.focus();
         }
 
         function closeCompletion() {
