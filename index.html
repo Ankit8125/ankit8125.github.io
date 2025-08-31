@@ -350,6 +350,23 @@
             display: block;
         }
 
+        /* Game Over Message */
+        .game-over {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            color: #FFD700;
+            padding: 32px 36px;
+            border-radius: 14px;
+            text-align: center;
+            z-index: 3000;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
+        .game-over.show { display: block; }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .hero-title { font-size: 22px; }
@@ -515,6 +532,15 @@
         </button>
     </div>
 
+    <!-- Game Over Message -->
+    <div class="game-over" id="gameOverMessage">
+        <h3 style="margin:0 0 10px 0;">Time over</h3>
+        <p style="margin:0; font-size: 12px; font-family: Arial, sans-serif; color: #fff;">Refresh to play again</p>
+        <div style="margin-top:14px;">
+            <button class="mode-btn" onclick="refreshPage()">REFRESH</button>
+        </div>
+    </div>
+
     <script>
         // Game Variables
         const canvas = document.getElementById('gameCanvas');
@@ -555,7 +581,8 @@
         let enemies = [];
         let currentMode = 'game';
         let camera = { x: 0, y: 0 };
-        let gameComplete = false;
+    let gameComplete = false;
+    let gameOverState = false; // lock when time runs out
         let popupTimer = null;
         let popupCountdown = 0; // ADDED: Countdown display
         let countdownInterval = null; // ADDED: Store countdown interval
@@ -823,7 +850,7 @@
 
         function startTimer() {
             setInterval(() => {
-                if (gameRunning && !gamePaused && time > 0) { // UPDATED: Also check for pause state
+                if (gameRunning && !gamePaused && !gameOverState && time > 0) { // UPDATED: Also check for pause and game over
                     time--;
                     document.getElementById('time').textContent = time.toString().padStart(3, '0');
                     if (time === 0) { gameOver(); }
@@ -834,12 +861,14 @@
         const keys = { right: false, left: false, up: false };
         document.addEventListener('keydown', (e) => {
             // Allow key state updates even when paused so keys don't get stuck
+            if (gameOverState) return; // lock controls after game over
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
             if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = true;
         });
         document.addEventListener('keyup', (e) => {
             // Always process keyup so releasing during popup clears movement
+            if (gameOverState) return; // inputs disabled after game over
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
             if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.up = false;
@@ -853,7 +882,7 @@
         }
 
         function update() {
-            if (!gameRunning || gamePaused) return; // UPDATED: Check for pause state
+            if (!gameRunning || gamePaused || gameOverState) return; // UPDATED: Check for pause + game over
 
             if (!mario.alive) {
                 mario.respawnTimer--;
@@ -1345,21 +1374,44 @@
             document.getElementById('completionMessage').classList.remove('show');
         }
 
-        function downloadResume() {
-            // Create a link to download the resume
-            const link = document.createElement('a');
-            link.href = 'resume/ankitResume.pdf'; // Path relative to index.html
-            link.download = 'Ankit_Verma_Resume.pdf';
-            link.target = '_blank';
-            
-            // Trigger download
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+        async function downloadResume() {
+            // Try common paths and verify file exists on the deployed site before triggering download
+            const resolveUrl = (rel) => {
+                try { return new URL(rel, document.baseURI).toString(); } catch { return rel; }
+            };
+            const candidates = [
+                'resume/Ankit_Verma_Resume.pdf',  // next to index.html
+                '/resume/Ankit_Verma_Resume.pdf'  // site root (in case of different build output)
+            ].map(resolveUrl);
+
+            for (const url of candidates) {
+                try {
+                    const resp = await fetch(url, { method: 'HEAD', cache: 'no-store' });
+                    if (resp.ok) {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'Ankit_Verma_Resume.pdf';
+                        a.target = '_blank';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        return;
+                    }
+                } catch (_) { /* ignore and try next */ }
+            }
+
+            alert('Resume file was not found on the site. Ensure the file exists at "resume/Ankit_Verma_Resume.pdf" (case-sensitive) in your deployed output. Tried:\n' + candidates.join('\n'));
         }
 
         function gameOver() {
             gameRunning = false;
+            gameOverState = true;
+            // Stop movement
+            keys.left = false; keys.right = false; keys.up = false;
+            mario.velocityX = 0; mario.velocityY = 0;
+            // Show overlay
+            const el = document.getElementById('gameOverMessage');
+            if (el) el.classList.add('show');
         }
 
         function switchMode(mode) {
@@ -1378,6 +1430,11 @@
                 gameRunning = false;
             }
         }
+
+        function refreshPage() {
+            // Reload the current page to restart the game
+            window.location.reload();
+        }
         
         window.onload = () => {
             initGame();
@@ -1386,7 +1443,7 @@
             const left = document.getElementById('btnLeft');
             const right = document.getElementById('btnRight');
             const jump = document.getElementById('btnJump');
-            const set = (k, v) => { keys[k] = v; };
+            const set = (k, v) => { if (!gameOverState) keys[k] = v; };
             const press = (el, downFn, upFn) => {
                 if (!el) return;
                 const onDown = (e) => { e.preventDefault(); downFn(); };
