@@ -505,6 +505,17 @@
                     <li>Integrated Jenkins for automated CI/CD pipelines, improving deployment efficiency.</li>
                 </ul>
             </div>
+
+            <div class="experience-item">
+                <div class="company-name">🌐 Eternz</div>
+                <div class="position">Engineer Intern (Django, GraphQL, PostgreSQL, ReactJs) | Remote | Sept 2025 - Nov 2025</div>
+                <ul class="achievements">
+                    <li>Improved logistics and delivery workflows by enhancing pincode management, business rules, and data consistency in order and logistics tables.</li>
+                    <li>Developed and optimized financial and invoice-related APIs, including secure PDF generation and direct-to-S3 file uploads using presigned URLs.</li>
+                    <li>Consolidated application logging by migrating print-based logs to a structured Python logging system, improving observability and debugging.</li>
+                    <li>Implemented internal CMS diff tools and automated bulk product/variant updates through cron-driven CSV processing for improved admin efficiency.</li>
+                </ul>
+            </div>
         </div>
 
         <div class="resume-section">
@@ -780,6 +791,12 @@
 
         const originalQuestionBlocksInfo = [
             { title: '🧰 Tech Stack', content: 'C++, Node.js, Express, React, Next.js, MongoDB, MySQL, Tailwind, Cloudinary, Multer, LangChain/LangGraph, OpenAI GPT-4o.' },
+            { title: '🌐 Eternz Internship', content: [
+                'Improved logistics and delivery workflows by enhancing pincode management, business rules, and data consistency.',
+                'Developed and optimized financial and invoice-related APIs with secure PDF generation and direct-to-S3 uploads.',
+                'Consolidated application logging by migrating to structured Python logging system.',
+                'Implemented internal CMS diff tools and automated bulk product/variant updates via CSV processing.'
+            ] },
             { title: '🚀 Simpl Internship', content: [
                 'Cut redundant external calls in Pay‑in‑3 by 75% without loss of functionality.',
                 'Built and deployed low‑latency credit‑config APIs used in core transactions.',
@@ -832,16 +849,18 @@
         
         // Simple horizontal layout with only 2 blocks above brown platforms
         const questionBlockPositions = [
-            { x: 300, y: 450, info: originalQuestionBlocksInfo[0] }, // Ground level
-            { x: 540, y: 380, info: originalQuestionBlocksInfo[1] }, // Above brown platform
-            { x: 650, y: 450, info: originalQuestionBlocksInfo[2] }, // Ground level
-            { x: 750, y: 450, info: originalQuestionBlocksInfo[3] }, // Ground level  
-            { x: 840, y: 360, info: originalQuestionBlocksInfo[4] }, // Above brown platform
-            { x: 950, y: 450, info: originalQuestionBlocksInfo[5] }, // Ground level
-            { x: 1050, y: 450, info: originalQuestionBlocksInfo[6] }, // Ground level
-            { x: 1200, y: 450, info: originalQuestionBlocksInfo[7] }, // Ground level
-            { x: 1300, y: 450, info: originalQuestionBlocksInfo[8] }, // Ground level
-            { x: 1400, y: 450, info: originalQuestionBlocksInfo[9] }, // Ground level (final)
+            { x: 300, y: 450, info: originalQuestionBlocksInfo[0] }, // Ground level - Tech Stack
+            { x: 400, y: 450, info: originalQuestionBlocksInfo[1] }, // Ground level - Eternz
+            { x: 540, y: 380, info: originalQuestionBlocksInfo[2] }, // Above brown platform - Simpl
+            { x: 650, y: 450, info: originalQuestionBlocksInfo[3] }, // Ground level - Fleeter
+            { x: 750, y: 450, info: originalQuestionBlocksInfo[4] }, // Ground level  
+            { x: 840, y: 360, info: originalQuestionBlocksInfo[5] }, // Above brown platform
+            { x: 950, y: 450, info: originalQuestionBlocksInfo[6] }, // Ground level
+            { x: 1050, y: 450, info: originalQuestionBlocksInfo[7] }, // Ground level
+            { x: 1200, y: 450, info: originalQuestionBlocksInfo[8] }, // Ground level
+            { x: 1300, y: 450, info: originalQuestionBlocksInfo[9] }, // Ground level
+            { x: 1400, y: 450, info: originalQuestionBlocksInfo[10] }, // Ground level
+            { x: 1500, y: 450, info: originalQuestionBlocksInfo[11] }, // Ground level (final - Connect)
         ];
         
         questionBlocks = questionBlockPositions;
